@@ -7,58 +7,82 @@ The B4Vex Simulation Project is designed to simulate various aspects of a sensor
 
 The project consists of several key components organized as follows:
 
-- `main.py`: The entry point of the simulation project. It currently triggers single and interval simulations. Future updates will include optimization capabilities.
-- `logging_config`: Configuration file(s) for logging purposes to help in debugging and tracking the simulation process.
-- `prerequisites`: Essential files and templates needed for the simulation to run. This includes:
-  - Various templates required for different parts of the simulation.
-  - `tofly3`: A specialized module or data set specific to this project.
-  - `src`: Contains Python source files critical to the simulation process.
-    - `simulation.py`: Describes the B4Vex simulation process in detail.
-    - `settings.py`: Configures the parameters for the sensor to be simulated.
-    - `interval.py`: Contains classes to simulate a parameter interval, crucial for interval-based simulations.
-    - Additional Python files that support the simulation process.
+### Main Components
 
-## Getting Started
+- **`main.py`**: The entry point of the simulation project. It has two main functions:
+  1. **main()**: Triggers the entire optimization cycle.
+     - Ensure you set up your attended configuration (e.g., `config = load_config(location=location, config_name="set10.yaml")`).
+  2. **single_postprocess()**: Triggers post-processing on an individual Demag Curve.
+     - Used to test and develop post-processes.
+     - Saves .dat file in the Data folder (e.g., `temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/2D_test.dat')`).
+
+### Logging Configuration
+
+- **`logging_config`**: Configuration file(s) for logging purposes to help in debugging and tracking the simulation process.
+
+### Logs
+
+- **`logs`**: Directory containing log files.
+  - **`master.log`**: Stores the logs with the log level set in the configuration (usually high).
+  - **`output.log`**: Stores all the output in the command line (same logs as in master but with a low log level).
+  - **`pid.txt`**: Stores process ID of the optimization run, which can be helpful in case of a detached terminal.
+
+### Data
+
+- **`data`**: Stores .dat demag curves files for individual post-process analysis.
 
 ### Prerequisites
 
-Before running the simulation, ensure that your environment is set up with the necessary dependencies. These can include but are not limited to:
+- **`prerequisites`**: Essential files and templates needed for the simulation to run. This includes:
+  - **`configs`**: Used to configure an optimization cycle. Will be called by `main.py`.
+    1. **`database`**: Has to be set up on the server you want to run your simulations on. Not required. Paths have to stay global.
+    2. **`shape`**: Set shape type (so far only box possible). Changing the mesh parameters is possible but not advisable.
+    3. **`simulation`**: Change the name to keep a good overview of your running processes. Set parameter interval + starting values to your desire. `h*` describes the outer magnetic field. A small hstep speeds everything up but also increases accuracy. Too small, and you will get in trouble with the post-processes.
+  - Various templates required for different parts of the simulation.
+    - **`_template_.krn`**: Defines the material properties.
+    - **`_template_.p2`**: Defines the outer magnetic field.
+    - **`_template_.slurm`**: B4Vex simulation SLURM template.
+    - **`salome.slurm`**: Salome SLURM job template.
+  - **`tofly3`**: A specialized module or dataset specific to this project.
+  - **`src`**: Contains Python source files critical to the simulation process.
+    - **`box_creator.py`**: Salome script for creating and meshing the box. Will be modified by `settings.py` for the specific shape of the box and meshing parameters.
+    - **`configuration.py`**: Reads the configuration file specified in `main.py`.
+    - **`simulation.py`**: Describes the B4Vex simulation process in detail.
+    - **`database_handler.py`**: Handles connections to the database.
+    - **`helper.py`**: Contains mostly logging functions.
+    - **`optimizer.py`**: Performs the optimization. Sets up the database and triggers post-processes. The `optimize()` function is the heart of the whole project.
+    - **`settings.py`**: Configures the parameters for the sensor in `box_creator.py` to be simulated.
+    - **`postProc.py`**: Performs post-processes. So far, it performs linear fits around 0+ and determines how long the demag curves stay within a defined margin for plotting.
 
-- Python 3.x
-- Relevant Python libraries (e.g., NumPy, Matplotlib) for computation and visualization
-- Any specific hardware or software requirements dictated by `tofly3` or other modules
+## Files that will be created during Simulations
 
-### Installation
+### operations_File (used in current or last iteration)
+- Contains all the (previously modified) actually used templates described above.
+- `___.unv`: Result from meshing. (So far, I cannot import this to Salome again. If you find a way, please let me know.)
+- `___.fly`: UNV file transformed to FLY format.
 
-1. Clone the repository or download the project files to your local machine.
-2. Navigate to the project directory.
-3. Install the required Python dependencies using pip:
+### results
+- Contains results from every optimization iteration.
+  - **`labels.txt`**: Overview of all labels and their parameters from all the simulation iterations.
+  - **`graphics`**: All the plots of successful post-processes.
+  - **`integer 1-x`**: Results from each iteration of optimization.
+    - **`operationsal_Files`**: See above.
+    - **`main`**: Results from B4Vex simulation.
+      - `__.dat`: Most important file of simulation to be analyzed by post-processes.
+    - **`salome`**: Results from Salome meshing.
 
-   ```sh
-   pip install -r requirements.txt
-   ```
 
-4. Configure the `logging_config` as needed to suit your debugging and logging preferences.
 
 ### Running a Simulation
 
-To start a simulation, simply run the `main.py` script:
+1. Create a configuration file in `prerequisites` according to your requirements.
+2. Configure the config file path in `main.py`.
+3. Run `main.py` as follows:
+   ```sh
+   nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 
-```sh
-python main.py
-```
 
-Currently, the `main.py` script supports single and interval simulations. You can modify this script to adjust the simulation parameters or to add new types of simulations as the project evolves.
 
-## Simulation Details
-
-- **Single Simulations**: Aimed at analyzing specific scenarios or configurations without varying parameters extensively.
-- **Interval Simulations**: Focus on varying parameters within specified intervals to understand the sensor's behavior under different conditions.
-- **Optimization (Future Work)**: Intended to identify the optimal parameters for desired outcomes using various optimization techniques.
-
-## Contributing
-
-Contributions to the B4Vex Simulation Project are welcome. Whether it's feature enhancements, bug fixes, or documentation improvements, your help is appreciated. Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 
@@ -67,7 +91,7 @@ This project is licensed under the MIT License - see the `LICENSE` file for deta
 
 
 
-DATAbase
+### DATAbase
 setup database individually. since there are only few different combinations of shape and meshing parameters these will stay manually. It also helps to keep track of databases.
 each database has ha sahke like box and meshing parameters like 
 box.main_Mesh_min = 0.1
@@ -79,5 +103,4 @@ each box is discribed via three maram xlen, ylen, zlen
 output parameter:
 len of lin demagnetizatuion curve
 
-path
-since all different instances are supposed to acces the same databases i will acces them with a absolut path
+

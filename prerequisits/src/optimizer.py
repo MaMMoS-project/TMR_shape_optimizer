@@ -9,7 +9,7 @@ from bayes_opt import BayesianOptimization, UtilityFunction
 import copy
 import logging
 
-# SUpposed to perform the entiere optimzation
+# SUpposed to perform the entiere optimzationThis
 
 class Optimizer:
     def __init__(self,locattion, max_Iter = None):

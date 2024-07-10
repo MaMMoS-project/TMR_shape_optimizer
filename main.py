@@ -71,5 +71,5 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    #main()
-    single_postprocess()
+    main()
+    #single_postprocess()

@@ -1,9 +1,1 @@
-2024-07-09 12:26:08,188 - root - INFO - Logging configured successfully.
-2024-07-09 12:26:08,188 - root - INFO - Configuration loaded: database=DatabaseConfig(use_DB=True, read_only=False, name='box403', db_path='/ceph/home/fillies/tmr_sensors/automatization/Databases/box403.db', postProc_global_path='/ceph/home/fillies/tmr_sensors/automatization/Databases/box403') shape=ShapeConfig(name='Box', main_Mesh_min=0.0001, main_mesh_max=1.0, object_Mesh_max=0.001) simulation=SimulationConfig(sim_name='NiFe_10', iter=200000, xlen_start=1.0, xlen_stop=2.0, ylen_start=0.1, ylen_stop=0.2, zlen_start=0.01, zlen_stop=0.02, hstart=0.5, hfinal=-0.3, hstep=-1e-05, init_xlen=1.0, init_ylen=0.1, init_zlen=0.01) server=ServerConfig(number_cores=1, mem_GB=12) generalSettings=generalSettingsConfig(log_level=1, location='/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer')
-2024-07-09 12:26:08,189 - prerequisits.src.optimizer - INFO - Magnetic field range set to hstart: 0.5, hfinal: -0.3, hstep: -1e-05
-2024-07-09 12:26:08,189 - prerequisits.src.optimizer - INFO - Mesh set to main_Mesh_min: 0.0001, main_mesh_max: 1.0, object_Mesh_max: 0.001
-2024-07-09 12:26:08,189 - prerequisits.src.optimizer - INFO - Server settings set to number_cores: 1, mem_GB: 12
-2024-07-09 12:26:08,189 - prerequisits.src.optimizer - INFO - Box created with [1.0, 0.1, 0.01]
-2024-07-09 12:26:08,189 - prerequisits.src.database_handler - ERROR - Failed to connect to the database: unable to open database file
-2024-07-09 12:26:08,189 - prerequisits.src.optimizer - INFO - Connected to the database at /ceph/home/fillies/tmr_sensors/automatization/Databases/box403.db
-2024-07-09 12:26:08,189 - prerequisits.src.optimizer - INFO - Reading Data from Database
+
