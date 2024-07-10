@@ -65,15 +65,16 @@ class Optimizer:
         self.logger.debug(f"Post-Processing results will be saved at {config.postProc_global_path}")
 
         #redd in data from database
-        if self.optimizer is not None:
+        self.read_only = config.read_only
+        if self.read_only:
+            self.logger.info("Database opened in read-only mode no data will be saved. Which is not nice try to colaberate :/")
+        
+        if self.optimizer is not None and not self.read_only:
             self.logger.info("Reading Data from Database")
             self.load_data_from_database(self.database_handler)
         else:
             self.logger.error("trying to read data but no optimizer created yet to pass to")
 
-        self.read_only = config.read_only
-        if self.read_only:
-            self.logger.info("Database opened in read-only mode no data will be saved. Which is not nice try to colaberate :/")
         
         # if the database is used also the first shape has to be loaded from the database
         self.logger.info("Overriding first shape from database")
@@ -167,7 +168,7 @@ class Optimizer:
         self.shape = box
         self.logger.info(f"Box created with {self.shape.get_info_shape()}")
 
-    def bayesian_optimization_setup(self):
+    def bayesian_optimization_setup(self, config: SimulationConfig):
             """
             Sets up the Bayesian Optimization for the optimizer.
 
@@ -186,7 +187,7 @@ class Optimizer:
             # for prove of concept use Bayes Optimizer
             # Bounded region of parameter space
             #pbounds = {'xlen': (5, 20), 'ylen': (0.1, 3), 'zlen': (0.005, 0.05)}
-            pbounds = {'xlen': (1, 2), 'ylen': (0.1, 0.2), 'zlen': (0.01, 0.02)}
+            pbounds = {'xlen': (config.xlen_start, config.xlen_stop), 'ylen': (config.ylen_start, config.ylen_stop), 'zlen': (config.zlen_start, config.zlen_stop)}
 
             
 
@@ -312,7 +313,7 @@ class Optimizer:
         postProc = PostProc(threshhold_training, margin_to_line, m_guess, self.shape, iter)
         postProc.load_file(self.location,  self.iter, self.current_simulation, self.shape.get_project_name()) 
         self.logger.debug("File loaded")
-        postProc.linear_regression()
+        postProc.linear_regression(regression_restart_counter = 0)
         postProc.anasyse_data()
         postProc.save_plot(self.location, self.iter)
         return postProc

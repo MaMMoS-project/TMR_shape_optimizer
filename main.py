@@ -4,8 +4,10 @@ import json
 import sys
 from pathlib import Path
 
-# scp -r /home/fillies/Documents/UWK_Projects/TMR_sensors/* fillies@scandium:/ceph/home/fillies/tmr_sensor_sensors/automatization/y/config_test_2/
+# scp -r /home/fillies/Documents/UWK_Projects/TMR_sensors/* fillies@scandium:/ceph/home/fillies/tmr_sensors/automatization/y/sets/9/.
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
+#watch -n 1 'squeue -u fillies'
+#tail -f logs/output.log
 
 
 
@@ -14,7 +16,7 @@ def main() -> None:
     location = os.path.dirname(os.path.abspath(__file__))
 
     # Load the configuration
-    config = load_config(location=location, config_name="testConfig.yaml")
+    config = load_config(location=location, config_name="set10.yaml")
 
     # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
@@ -32,8 +34,7 @@ def main() -> None:
     optimizer.creat_real_box(config) # only saves the values to the box does not apply any chages to the files
     
     # initialize bay optimizer
-    if config.database.use_DB:
-        optimizer.bayesian_optimization_setup()
+    optimizer.bayesian_optimization_setup(config.simulation)
 
 
     #db_path = '/home/fillies/Documents/UWK_Projects/tmr_sensor_sensors/autoSim/Database/box414.db'
@@ -56,9 +57,8 @@ def single_postprocess():
     margin_to_line=0.05
     #print(threshhold_training, margin_to_line)
     temp_post = PostProc(threshhold_training, margin_to_line )
-    temp_post.load_file('/home/fillies/Documents/UWK_Projects/tmr_sensor/autoSim/localVersion/operations_Files/02m020001.dat')
-    #temp_post.load_file('/home/fillies/Documents/UWK_Projects/tmr_sensor/autoSim/postProcesses/1_m1_trueBox.dat')
-    temp_post.linear_regression()
+    temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/2D_test.dat')
+    temp_post.linear_regression(regression_restart_counter = 0)
     temp_post.anasyse_data()
     temp_post.plot_data()
 
@@ -71,5 +71,5 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    main()
-    #single_postprocess()
+    #main()
+    single_postprocess()

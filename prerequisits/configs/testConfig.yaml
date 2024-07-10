@@ -2,8 +2,8 @@ database:
   use_DB: False
   read_only: True  
   name: "box403"                                                                           # save your data in the database its nicer :)
-  db_path: '/ceph/home/fillies/tmr_sensor_sensors/automatization/Databases/box403.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
-  postProc_global_path: '/ceph/home/fillies/tmr_sensor_sensors/automatization/Databases/box403' # Abs path to folder where plots of post proc will be saved also need to stay global                                
+  db_path: '/ceph/home/fillies/tmr_sensor/automatization/Databases/box403.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
+  postProc_global_path: '/ceph/home/fillies/tmr_sensor/automatization/Databases/box403' # Abs path to folder where plots of post proc will be saved also need to stay global                                
 
 shape:
   name: "Box"
@@ -13,7 +13,7 @@ shape:
 
 simulation:
   sim_name: 'ConfigTest'
-  iter: 1000
+  iter: 10000
   init_xlen: 1
   init_ylen: 0.1
   init_zlen: 0.01
@@ -21,7 +21,7 @@ simulation:
   xlen_stop: 2
   ylen_start: 0.1
   ylen_stop: 0.2
-  zlen_start: 0.01
+  zlen_start: 0.0199999
   zlen_stop: 0.02
   hstart: 0.4
   hfinal: -0.2

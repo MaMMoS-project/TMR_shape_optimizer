@@ -2,17 +2,17 @@ database:
   use_DB: True
   read_only: False  
   name: "box403"                                                                           # save your data in the database its nicer :)
-  db_path: '/ceph/home/fillies/tmr_sensor_sensors/automatization/Databases/box403.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
-  postProc_global_path: '/ceph/home/fillies/tmr_sensor_sensors/automatization/Databases/box403' # Abs path to folder where plots of post proc will be saved also need to stay global                                
+  db_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/box403.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
+  postProc_global_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/box403' # Abs path to folder where plots of post proc will be saved also need to stay global                                
 
 shape:
   name: "Box"
   main_Mesh_min: 1e-4
   main_mesh_max: 1.0
-  object_Mesh_max: 5e-3  # 5e-9
+  object_Mesh_max: 1e-3  # 5e-9
 
 simulation:
-  sim_name: 'NiFe_9'
+  sim_name: 'NiFe_10'
   iter: 200000
   init_xlen: 1
   init_ylen: 0.1

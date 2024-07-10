@@ -35,8 +35,15 @@ class DatabaseHandler:
      
         
     def query(self, query):
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
+        if self.cursor is None:
+            self.logger.error("No database cursor. Query cannot be executed.")
+            return None
+        try:
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        except sqlite3.Error as e:
+            self.logger.error(f"Error executing query: {e}")
+            return None
     
     def query_and_count(self, sql):
         try:

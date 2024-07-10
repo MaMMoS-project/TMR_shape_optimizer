@@ -115,7 +115,7 @@ class PostProc:
         self.df_training = self.df_training[self.df_training['M'] >= 0]
 
     
-    def load_file(self, file_path):
+    def load_file_singe(self, file_path):
         #--------load file----------------
         
 
@@ -151,23 +151,62 @@ class PostProc:
         
 
         #--------extrtact data----------------
+        self.extract_data()
                 
+    def extract_data(self, index_adjustment=0):
+        """
+        Extracts data from the given dataset for fitting only.
+
+        Parameters:
+        - index_adjustment (int): The adjustment value for the index.
+                                If fitting is not working, raise the value to try a different part for the linear regression.
+
+        Returns:
+        None
+        """
 
         # Extract columns 2 and 3 from the data
         self.df = pd.DataFrame(self.data, columns=['time', 'H_ex', 'M'])
 
+        # For training, only consider certain points:
+        try:
+            # Determine the upper boundary for training data
+            upper_index = index_adjustment + np.argmin(np.abs(self.df['M'] - self.threshhold_training))
+            self.h_threshhold_training = self.df['H_ex'].iloc[upper_index]
+            
+            # Filter the data for the training set
+            self.df_training = self.df[self.df['H_ex'] < self.h_threshhold_training]
 
-        #for taining only consider certain points:
-        self.h_threshhold_training = self.df['H_ex'].iloc[np.argmin(np.abs(self.df['M'] - self.threshhold_training))]
-        self.df_training = self.df[self.df['H_ex'] < self.h_threshhold_training]
-        self.df_training = self.df_training[self.df_training['M'] >= 0]
-        #print(self.df_training)
-    
+            # Determine the lower boundary for training data
+            lower_index = index_adjustment + np.argmin(np.abs(self.df['M'] >= 0))
+            self.h_threshhold_training_lowerbound = self.df['H_ex'].iloc[lower_index]
+            
+            # Further filter the training set based on the lower boundary
+            self.df_training = self.df_training[self.df_training['H_ex'] >= self.h_threshhold_training_lowerbound]
+        except Exception as e:
+            self.logger.error(f'[ERROR]: Could not extract data with index_adjustment of {index_adjustment}: {e}')
+            raise ValueError('Skip Postprocessing')
+
         
 
     #----------- compute linear regression----------------
     # Fixed point through which the regression line should pass
-    def linear_regression(self):
+    def linear_regression(self, regression_restart_counter):
+        """
+        Performs linear regression on the given data points.
+
+        Args:
+            regression_restart_counter (int): The number of times the regression has been restarted.
+
+        Raises:
+            ValueError: If there are less than 10 points in the margin for linear regression.
+            ValueError: If the optimization did not converge.
+            ValueError: If the optimization is suspiciously inaccurate.
+            ValueError: If the slope is not within a reasonable range.
+
+        Returns:
+            None
+        """
 
         # quadratic penalty function
         def penalty_function(m, x, y, b = 0):
@@ -190,6 +229,7 @@ class PostProc:
 
         res = minimize(penalty_function, self.m_guess, args=(self.df_training['H_ex'], self.df_training['M'], self.results.get_b()))
         self.results.set_res_of_optimization(res)
+        print(res)
 
         # Test is the linear regression has worked:
         #break if not converged
@@ -198,8 +238,14 @@ class PostProc:
             raise ValueError(f'Skip Postprocessing')
         
         # breakt accuracy is not good enough
-        if not np.abs(res.fun) < self.margin_to_line:
+        if not res.success:
             self.logger.error(f'[ERROR]: Optimization is suspiciusly unaccuract: {res.fun}, check .dat for bad hysteresis loop')
+            if regression_restart_counter < 10:
+                # Restart the regression with a index_adjustment
+                # there migt be a jump in the demag curve and we will try to avoid it
+                self.logger.error(f'[INFO]: Restarting regression with index_adjustment = {regression_restart_counter}')
+                self.extract_data(index_adjustment=regression_restart_counter**2)
+                self.linear_regression(regression_restart_counter + 1)
             raise ValueError(f'Skip Postprocessing')
         # breat if slope is odd
         if not res.x > 0 and res.x < 1000:
@@ -281,8 +327,8 @@ class PostProc:
         plt.plot(x_reg, y_margin_low, color='green', linestyle='--', label=f'Lower Margin: m = {self.m_calc[0]:.2f}x b = {-self.margin_to_line} ')
         plt.plot(x_reg, y_margin_high, color='green', linestyle='--', label=f'Upper Margin: m = {self.m_calc[0]:.2f}x b = {+ self.margin_to_line} ')
         plt.axvline(0, color='black', linestyle='--')
-        plt.xlabel('H_ex')
-        plt.ylabel('M')
+        plt.xlabel('$H_{ex}$')
+        plt.ylabel('$m_y$')
         plt.title(f'Iteration: {self.iter} Shape: {self.schape_name} Shape Info: {self.shape_info}')
 
         plt.legend()
