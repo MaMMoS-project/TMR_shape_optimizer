@@ -16,21 +16,19 @@ def main() -> None:
     location = os.path.dirname(os.path.abspath(__file__))
 
     # Load the configuration
-    config = load_config(location=location, config_name="set10.yaml")
+    config = load_config(location=location, config_name="2D_set3.yaml")
 
     # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
 
     setup_logging(log_level=config.generalSettings.log_level, base_dir= config.generalSettings.location )  
 
-    # Access configuration
-    #print(config)
     # log config
     logging.info(f"Configuration loaded: {config}")
 
     optimizer = Optimizer(locattion=config.generalSettings.location ,
                           max_Iter=config.simulation.iter)
-    #optimizer.create_default_box()
+
     optimizer.creat_real_box(config) # only saves the values to the box does not apply any chages to the files
     
     # initialize bay optimizer
