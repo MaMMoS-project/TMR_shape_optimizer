@@ -1,5 +1,5 @@
 database:
-  use_DB: False
+  use_DB: True
   read_only: False  
   name: "box403"                                                                        # save your data in the database its nice :)
   db_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/box403.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
@@ -12,8 +12,8 @@ shape:
   object_Mesh_max: 5e-3  
 
 simulation:
-  sim_name: 'ConfigTest'
-  iter: 10000
+  sim_name: 'MP_test'
+  iter: 5
   init_xlen: 1
   init_ylen: 0.1
   init_zlen: 0.01
@@ -25,7 +25,7 @@ simulation:
   zlen_stop: 0.0141001
   hstart: 0.4
   hfinal: -0.2
-  hstep: -0.00001
+  hstep: -0.0001
 
   
 

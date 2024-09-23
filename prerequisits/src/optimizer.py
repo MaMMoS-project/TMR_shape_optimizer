@@ -1,6 +1,6 @@
 from prerequisits.src.helper import *
 from prerequisits.src.simulation import *
-from prerequisits.src.Settings import *
+from prerequisits.src.templet_modify import *
 from prerequisits.src.postProc import *
 from prerequisits.src.database_handler import *
 from prerequisits.src.configuration import *
@@ -236,13 +236,15 @@ class Optimizer:
                 self.iter = i
                 self.logger.info(f"Starting Iteration {i}")
                 self.current_simulation = Simmulation(self.shape,  self.location, iter=self.iter)
-                self.current_simulation.run_Simulation()
+                self.current_simulation.run_Simulation()        # does not return specific Data but saves the data to file where post process can access
                 self.logger.debug("Starting post-processing")
                 try:
+                    #perform post processing
                     postProc = self.post_process(i)
                     self.current_simulation.set_results(postProc.get_results())
                     self.all_simulations.append(copy.deepcopy(self.current_simulation))
 
+                    #get results of post processing
                     params= self.shape.get_info_shape()
                     label = self.current_simulation.get_results().get_x_max_lin()
                     self.logger.info(f"Result of Post-Processing: lin Hysterese Distance: {label}")
@@ -257,7 +259,7 @@ class Optimizer:
                     #save results localy
                     append_line_to_file(self.location + '/output/labels.txt', params, label)
 
-
+                    #update shape
                     self.logger.debug("Updating shape")
                     self.shape = self.update_shape(params, label )
                     self.logger.info(f"Shape updated to {self.shape.get_info_shape()}")
@@ -273,7 +275,7 @@ class Optimizer:
                 
     def get_initial_shape(self):
         new_suggestion = self.optimizer.suggest(self.utility_bayesian)
-        self.logger.debug(f"Init shape to: {new_suggestion}")
+        self.logger.info(f"Init shape to: {new_suggestion}")
         new_shape = copy.deepcopy(self.shape)
         new_shape.set_xlen(new_suggestion['xlen'])
         new_shape.set_ylen(new_suggestion['ylen'])
@@ -311,10 +313,15 @@ class Optimizer:
         """
         
         postProc = PostProc(threshhold_training, margin_to_line, m_guess, self.shape, iter)
+        #load .dat file
         postProc.load_file(self.location,  self.iter, self.current_simulation, self.shape.get_project_name()) 
         self.logger.debug("File loaded")
+        #perform linear regression
         postProc.linear_regression(regression_restart_counter = 0)
+        self.logger.debug("Linear Regression done")
+        # anlayse data towards the linear regression
         postProc.anasyse_data()
+    
         postProc.save_plot(self.location, self.iter)
         return postProc
         
