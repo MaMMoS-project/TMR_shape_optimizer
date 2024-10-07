@@ -14,7 +14,7 @@ class Simmulation():
         """
         This function orchestrates the entire simulation workflow for a given geometric shape.
         It encompasses several steps including preprocessing, mesh generation, transformation of mesh format,
-        and execution of the main simulation job. The function ensures all necessary directories and files are
+        and execution of the microMag simulation job. The function ensures all necessary directories and files are
         set up correctly and manages the submission of jobs to a simulation engine (e.g., Salome for mesh generation).
 
         Args:
@@ -37,7 +37,7 @@ class Simmulation():
         self.resluts = None
 
         # Save slum ID for acces of the output files
-        self.main_SlurmID = None
+        self.microMag_SlurmID = None
         self.salome_SlurmID = None
         self.iter = iter
 
@@ -48,14 +48,15 @@ class Simmulation():
         1. Preprocessing setup: Creation of necessary directories and verification of prerequisite files.
         2. File generation: Execution of scripts to generate simulation files specific to the 'shape'.
         3. Mesh generation: Submission of a mesh generation job to Salome and transformation of the mesh format.
-        4. Simulation execution: Submission of the main simulation job and management of its output.
+        4. Simulation execution: Submission of the microMag simulation job and management of its output.
 
         Throughout the process, the function logs progress and important information, facilitating debugging and monitoring.
         It also performs checks at each stage to ensure the workflow can proceed, halting with descriptive error messages
         if necessary conditions are not met.
         """
-            # Preprocessing setup
-        self.logger.info("Starting preprocessing setup...")
+
+        # Preprocessing setup
+        self.logger.debug("Starting preprocessing setup...")
         self.delete_and_create_folder("operations_Files")
         self.create_directory_if_not_exists(f"output")
         self.create_directory_if_not_exists(f"output/graphics")
@@ -66,11 +67,11 @@ class Simmulation():
         self.logger.debug("Checking for required files in the 'prerequisits' directory...")
         self.make_all_files_in_dir_executable("prerequisits" )
         self.check_files_in_folder("prerequisits", ["_template_.krn", "_template_.p2", "_template_.slurm", "tofly3"])
-        self.check_files_in_folder("prerequisits/src", ["box_creator.py", "Settings.py", "simulation.py"])
-        self.logger.info("All required files found in the 'prerequisits' directory.")
+        self.check_files_in_folder("prerequisits/src", ["box_creator.py", "templet_modify.py", "simulation.py"])
+        self.logger.debug("All required files found in the 'prerequisits' directory.")
 
 
-        # Execute Settings.py to generate files for the specific shape
+        # Execute templet_modify.py to generate files for the specific shape
         self.logger.debug("Generating files for the specific shape...")
         self.generate_files_for_shape()
         project_name = self.shape.get_project_name()
@@ -80,7 +81,7 @@ class Simmulation():
             sys.exit(1)
 
         # Mesh generation with Salome and format transformation
-
+        self.logger.info("Starting mesh generation with Salome...")
         salome_job_id = self.run_salome_mesh_generation(project_name )
         self.salome_SlurmID = salome_job_id
 
@@ -95,18 +96,18 @@ class Simmulation():
         # Check if essential files exist and make them accessible for simulation
         self.check_and_make_accessible(["slurm", "fly", "p2", "krn"],project_name)
 
-        # Start the main simulation
-        self.logger.info(f"All preliminary checks passed. Starting the main simulation with {project_name}.slurm...")
+        # Start the microMag simulation
+        self.logger.info(f"All preliminary checks passed. Starting the microMag simulation with {project_name}.slurm...")
         self.logger.info(f"Curretn shape: {self.shape.get_info_shape()}")
-        #os.chdir(base_dir)
-        main_job_id, run_time = self.submit_job_and_wait(f"{self.location}/operations_Files/{project_name}.slurm")
-        self.main_SlurmID = main_job_id
-        self.logger.info(f"Main simulation job completed in {run_time/60} min.")
+        
+        microMag_job_id, run_time = self.submit_job_and_wait(f"{self.location}/operations_Files/{project_name}.slurm")
+        self.microMag_SlurmID = microMag_job_id
+        self.logger.info(f"microMag simulation job completed in {run_time/60} min.")
 
-        # collect results from main job
-        self.create_directory_if_not_exists(f"output/{self.iter}/main" )
-        self.move_simulation_output(f"{self.location}/operations_Files/output/slurm_{main_job_id}", f"{self.location}/output/{self.iter}/main")
-        self.check_folder_exists(f"{self.location}/output/{self.iter}/main/slurm_{main_job_id}" )
+        # collect results from microMag job
+        self.create_directory_if_not_exists(f"output/{self.iter}/microMag" )
+        self.move_simulation_output(f"{self.location}/operations_Files/output/slurm_{microMag_job_id}", f"{self.location}/output/{self.iter}/microMag")
+        self.check_folder_exists(f"{self.location}/output/{self.iter}/microMag/slurm_{microMag_job_id}" )
 
         # also collect al the operational files 
         self.create_directory_if_not_exists(f"output/{self.iter}/operations_Files" )
@@ -124,8 +125,8 @@ class Simmulation():
         self.logger.info("Simulation workflow completed successfully. :<)")
 
 
-    def get_main_SlurmID(self):
-        return self.main_SlurmID
+    def get_microMag_SlurmID(self):
+        return self.microMag_SlurmID
     
     def get_salome_SlurmID(self):
         return self.salome_SlurmID

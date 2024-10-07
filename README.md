@@ -51,7 +51,7 @@ The project consists of several key components organized as follows:
     - **`database_handler.py`**: Handles connections to the database.
     - **`helper.py`**: Contains mostly logging functions.
     - **`optimizer.py`**: Performs the optimization. Sets up the database and triggers post-processes. The `optimize()` function is the heart of the whole project.
-    - **`settings.py`**: Configures the parameters for the sensor in `box_creator.py` to be simulated.
+    - **`templet_modify.py`**: Configures the parameters for the sensor in `box_creator.py` to be simulated.
     - **`postProc.py`**: Performs post-processes. So far, it performs linear fits around 0+ and determines how long the demag curves stay within a defined margin for plotting.
 
 ## Files that will be created during Simulations

@@ -7,6 +7,7 @@ import pandas as pd
 import logging
 import matplotlib
 import logging
+from sklearn.metrics import r2_score
 
 from prerequisits.src.results import *
 
@@ -69,7 +70,7 @@ class PostProc:
         #--------load file----------------
         
 
-        file_path = os.path.join(location, f"output/{iter}/main/slurm_{simulation.get_main_SlurmID()}/{project_Name}.dat")
+        file_path = os.path.join(location, f"output/{iter}/microMag/slurm_{simulation.get_microMag_SlurmID()}/{project_Name}.dat")
         self.logger.debug(f"Loading file {file_path}")
 
         
@@ -229,16 +230,16 @@ class PostProc:
 
         res = minimize(penalty_function, self.m_guess, args=(self.df_training['H_ex'], self.df_training['M'], self.results.get_b()))
         self.results.set_res_of_optimization(res)
-        print(res)
+        #print(res)
 
         # Test is the linear regression has worked:
         #break if not converged
-        if not res.success:
+        if not res.success:   
             self.logger.error(f'Optimization did not converge in general: {res.message}')
             raise ValueError(f'Skip Postprocessing')
         
         # breakt accuracy is not good enough
-        if not res.success:
+        if not res.success:   #TODO: configure with actuall accuracy
             self.logger.error(f'[ERROR]: Optimization is suspiciusly unaccuract: {res.fun}, check .dat for bad hysteresis loop')
             if regression_restart_counter < 10:
                 # Restart the regression with a index_adjustment
@@ -248,7 +249,7 @@ class PostProc:
                 self.linear_regression(regression_restart_counter + 1)
             raise ValueError(f'Skip Postprocessing')
         # breat if slope is odd
-        if not res.x > 0 and res.x < 1000:
+        if not res.x[0] > 0 and res.x[0] < 1000:
             self.logger.error(f'[ERROR]: Slope is not reasonable: {res.x}')
             raise ValueError(f'Skip Postprocessing')
 
