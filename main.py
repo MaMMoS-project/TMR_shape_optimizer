@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-# scp -r /home/fillies/Documents/UWK_Projects/TMR_sensors/* fillies@scandium:/ceph/home/fillies/tmr_sensors/automatization/y/sets/9/.
+# scp -r /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/* fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/.
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 #watch -n 1 'squeue -u fillies'
 #tail -f logs/output.log
@@ -16,7 +16,7 @@ def main() -> None:
     location = os.path.dirname(os.path.abspath(__file__))
 
     # Load the configuration
-    config = load_config(location=location, config_name="MP_temp.yaml")
+    config = load_config(location=location, config_name="restart_test2.yaml")
 
     # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
@@ -68,5 +68,5 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    #main()
-    single_postprocess()
+    main()
+    #single_postprocess()
