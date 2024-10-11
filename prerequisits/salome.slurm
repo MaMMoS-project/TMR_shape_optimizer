@@ -1,10 +1,11 @@
 #!/bin/bash
 #SBATCH --partition=dissSims
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --ntasks=4
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G	# MB
 #SBATCH --time=0-2		# MINUTES, DAYS-HOURS
+#SBATCH --licenses=meshgems:1
 #
 # OPTIONAL
 #SBATCH --export=None
@@ -33,7 +34,7 @@ cd "$SIM_DIR"
 echo "PWD:" $PWD
 cp "$SLURM_SUBMIT_DIR"/step2_salome_macroFullLM_2nm.py .
 #cp "$SLURM_SUBMIT_DIR"/equi_128_dirac75.tess .
-cp "$SLURM_SUBMIT_DIR"/c300_lnorm_50.00_21.00_1.00.tess .
+#cp "$SLURM_SUBMIT_DIR"/c300_lnorm_50.00_21.00_1.00.tess .
 
 # meshing
 "$SALOME" start -t step2_salome_macroFullLM_2nm.py

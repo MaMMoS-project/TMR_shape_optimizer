@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from prerequisits.src.configuration import *
-
+import logging
 
 class SimulationSettings:
     # Assuming some basic implementation or properties for SimulationSettings
@@ -330,9 +330,10 @@ class Box(SimulationSettings):
         with open(file_path, 'r') as file:
             script_content = file.read()
 
+        logging.debug(f"Modifying salome slurm file: {file_path}")
         script_content = script_content.replace('--job-name="salome_equi_n128_dirac75_2nm"', '--job-name="' + str(self.projectName) + '"')
         script_content = script_content.replace('--mem=8G', '--mem=' + str(self.mem_GB) )
-        script_content = script_content.replace('--cpus-per-task=1', '--cpus-per-task=' + str(self.number_cores) )
+        script_content = script_content.replace('--cpus-per-task=4', '--cpus-per-task=' + str(self.number_cores) )
         script_content = script_content.replace('"$SLURM_SUBMIT_DIR"/step2_salome_macroFullLM_2nm.py', '"$SLURM_SUBMIT_DIR"/salome_mesh.py')
         script_content = script_content.replace('step2_salome_macroFullLM_2nm.py', 'salome_mesh.py')
     

@@ -4,6 +4,7 @@ from prerequisits.src.templet_modify import *
 from prerequisits.src.postProc import *
 from prerequisits.src.database_handler import *
 from prerequisits.src.configuration import *
+from prerequisits.src.templet_modify import *
 from bayes_opt import BayesianOptimization, UtilityFunction
 
 import copy
@@ -225,7 +226,7 @@ class Optimizer:
     def optimize(self):
         # check if box is created
         if self.shape is None:
-            self.logger.error("No boshapex created yet")
+            self.logger.error("No shape created yet")
             return
         
                

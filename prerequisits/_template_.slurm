@@ -8,7 +8,7 @@
 #
 # GPU options
 #SBATCH --gres=gpu:1		# request also one cpu per gpu
-#SBATCH --constraint=nvidia
+#SBATCH --constraint=cuda
 #
 # OPTIONAL
 #SBATCH --export=NONE   # do not propagate environment variables from submit node to allocated node
