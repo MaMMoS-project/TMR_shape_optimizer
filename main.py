@@ -16,7 +16,7 @@ def main() -> None:
     location = os.path.dirname(os.path.abspath(__file__))
 
     # Load the configuration
-    config = load_config(location=location, config_name="restart_3.yaml")
+    config = load_config(location=location, config_name="restart_6.yaml")
 
     # set location of simulation to the location of the main.py file
     config.generalSettings.location = location

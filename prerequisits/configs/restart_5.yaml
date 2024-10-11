@@ -7,12 +7,12 @@ database:
 
 shape:
   name: "Box"
-  main_Mesh_min: 1e-5
+  main_Mesh_min: 1e-4
   main_mesh_max: 1.0
-  object_Mesh_max: 1e-4  # 5e-9
+  object_Mesh_max: 5e-3  # 5e-9
 
 simulation:
-  sim_name: 'restart4'
+  sim_name: 'restart5'
   iter: 200000
   init_xlen: 1
   init_ylen: 0.1
@@ -30,7 +30,7 @@ simulation:
   
 
 server:
-  number_cores: 2
+  number_cores: 4
   mem_GB: 20
 
 generalSettings:

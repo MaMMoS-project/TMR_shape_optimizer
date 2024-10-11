@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --partition=dissSims
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G	# MB
 #SBATCH --time=0-2		# MINUTES, DAYS-HOURS
-#SBATCH --licenses=meshgems:1
+
 #
 # OPTIONAL
 #SBATCH --export=None
