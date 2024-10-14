@@ -4,6 +4,7 @@ from prerequisits.src.templet_modify import *
 from prerequisits.src.postProc import *
 from prerequisits.src.database_handler import *
 from prerequisits.src.configuration import *
+from prerequisits.src.templet_modify import *
 from bayes_opt import BayesianOptimization, UtilityFunction
 
 import copy
@@ -168,7 +169,7 @@ class Optimizer:
         self.shape = box
         self.logger.info(f"Box created with {self.shape.get_info_shape()}")
 
-    def bayesian_optimization_setup(self, config: SimulationConfig):
+    def bayesian_optimization_setup(self, config: Config):
             """
             Sets up the Bayesian Optimization for the optimizer.
 
@@ -187,7 +188,16 @@ class Optimizer:
             # for prove of concept use Bayes Optimizer
             # Bounded region of parameter space
             #pbounds = {'xlen': (5, 20), 'ylen': (0.1, 3), 'zlen': (0.005, 0.05)}
-            pbounds = {'xlen': (config.xlen_start, config.xlen_stop), 'ylen': (config.ylen_start, config.ylen_stop), 'zlen': (config.zlen_start, config.zlen_stop)}
+            if config.simulation.xlen_start > config.simulation.xlen_stop:
+                logging.error("xlen_start has to be smaller than xlen_stop")
+                exit()
+            if config.simulation.ylen_start > config.simulation.ylen_stop:
+                logging.error("ylen_start has to be smaller than ylen_stop")
+                exit()
+            if config.simulation.zlen_start > config.simulation.zlen_stop:
+                logging.error("zlen_start has to be smaller than zlen_stop")
+                exit()
+            pbounds = {'xlen': (config.simulation.xlen_start, config.simulation.xlen_stop), 'ylen': (config.simulation.ylen_start, config.simulation.ylen_stop), 'zlen': (config.simulation.zlen_start, config.simulation.zlen_stop)}
 
             
 
@@ -198,9 +208,10 @@ class Optimizer:
                 random_state=42,
                 verbose=2  # Verbose output (loggin level)
             )
+            
 
-            self.utility_bayesian = UtilityFunction(kind="ucb", kappa=2.5, xi=0.0)
-
+            self.utility_bayesian = UtilityFunction(kind=config.optimizer.acq_kind, kappa=config.optimizer.kappa, xi=config.optimizer.xi, kappa_decay=config.optimizer.kappa_decay, kappa_decay_delay=config.optimizer.kappa_decay_delay)
+            self.logger.info(f"Bo setup with Acquisation function: {config.optimizer.acq_kind}, kappa: {config.optimizer.kappa}, xi: {config.optimizer.xi}, kappa_decay: {config.optimizer.kappa_decay}, kappa_decay_delay: {config.optimizer.kappa_decay_delay}")
 
     def update_database(self, param, label):
         """
@@ -225,7 +236,7 @@ class Optimizer:
     def optimize(self):
         # check if box is created
         if self.shape is None:
-            self.logger.error("No boshapex created yet")
+            self.logger.error("No shape created yet")
             return
         
                

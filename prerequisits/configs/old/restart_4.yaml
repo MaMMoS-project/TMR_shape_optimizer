@@ -12,26 +12,26 @@ shape:
   object_Mesh_max: 1e-4  # 5e-9
 
 simulation:
-  sim_name: 'NiFe_9'
+  sim_name: 'restart4'
   iter: 200000
   init_xlen: 1
-  init_ylen: 0.01
+  init_ylen: 0.1
   init_zlen: 0.01
-  xlen_start: 0.1
-  xlen_stop: 0.2
-  ylen_start: 0.01
-  ylen_stop: 0.02
+  xlen_start: 1
+  xlen_stop: 2
+  ylen_start: 0.1
+  ylen_stop: 0.2
   zlen_start: 0.01
   zlen_stop: 0.02
   hstart: 0.5
   hfinal: -0.3
-  hstep: -0.00001
+  hstep: -0.0001
 
   
 
 server:
-  number_cores: 1
-  mem_GB: 12
+  number_cores: 2
+  mem_GB: 20
 
 generalSettings:
   log_level: 2
