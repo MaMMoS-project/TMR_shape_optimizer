@@ -12,17 +12,17 @@ shape:
   object_Mesh_max: 5e-3  # 5e-9
 
 simulation:
-  sim_name: 'acq_t1'
-  iter: 20
-  init_xlen: 1
+  sim_name: 'quader'
+  iter: 2000
+  init_xlen: 0.1
   init_ylen: 0.1
-  init_zlen: 0.01
-  xlen_start: 1
-  xlen_stop: 2
+  init_zlen: 0.1
+  xlen_start: 0.1
+  xlen_stop: 0.2
   ylen_start: 0.1
   ylen_stop: 0.2
-  zlen_start: 0.01
-  zlen_stop: 0.02
+  zlen_start: 0.1
+  zlen_stop: 0.2
   hstart: 0.5
   hfinal: -0.3
   hstep: -0.0001

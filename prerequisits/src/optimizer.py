@@ -211,7 +211,7 @@ class Optimizer:
             
 
             self.utility_bayesian = UtilityFunction(kind=config.optimizer.acq_kind, kappa=config.optimizer.kappa, xi=config.optimizer.xi, kappa_decay=config.optimizer.kappa_decay, kappa_decay_delay=config.optimizer.kappa_decay_delay)
-
+            self.logger.info(f"Bo setup with Acquisation function: {config.optimizer.acq_kind}, kappa: {config.optimizer.kappa}, xi: {config.optimizer.xi}, kappa_decay: {config.optimizer.kappa_decay}, kappa_decay_delay: {config.optimizer.kappa_decay_delay}")
 
     def update_database(self, param, label):
         """
