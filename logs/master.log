@@ -1,1 +1,6 @@
 
+2024-10-14 10:37:11,880 - root - INFO - Logging configured successfully.
+2024-10-14 10:37:11,883 - prerequisits.src.optimizer - INFO - Magnetic field range set to hstart: 0.5, hfinal: -0.3, hstep: -0.0001
+2024-10-14 10:37:11,884 - prerequisits.src.optimizer - INFO - Mesh set to main_Mesh_min: 0.0001, main_mesh_max: 1.0, object_Mesh_max: 0.005
+2024-10-14 10:37:11,884 - prerequisits.src.optimizer - INFO - Server settings set to number_cores: 4, mem_GB: 20
+2024-10-14 10:37:11,884 - prerequisits.src.optimizer - INFO - Box created with [1.0, 0.1, 0.01]

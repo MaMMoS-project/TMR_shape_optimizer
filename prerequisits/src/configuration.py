@@ -40,12 +40,22 @@ class generalSettingsConfig(BaseModel):
     log_level: int
     location: str
 
+class Optimizer(BaseModel):
+    acq_kind: str
+    kappa: float
+    xi: float
+    kappa_decay: float
+    kappa_decay_delay: int
+
 class Config(BaseModel):
     database: DatabaseConfig
     shape: ShapeConfig
     simulation: SimulationConfig
     server: ServerConfig
     generalSettings: generalSettingsConfig
+    optimizer: Optimizer
+
+
 
 #'/home/fillies/Documents/UWK_Projects/tmr_sensor_sensors/autoSim/localVersion/prerequisits/configs/testConfig.yaml'
 def load_config(location: str, config_name: str) -> Config:
@@ -56,8 +66,8 @@ def load_config(location: str, config_name: str) -> Config:
 
 
 
-"""# Load the configuration
-config = load_config('/home/fillies/Documents/UWK_Projects/tmr_sensors/autoSim/localVersion/prerequisits/configs/testConfig.yaml')
+# Load the configuration
+"""config = load_config('/home/fillies/Documents/UWK_Projects/tmr_sensors/autoSim/localVersion/prerequisits/configs/testConfig.yaml')
 
 # Access configuration
 print(config)
