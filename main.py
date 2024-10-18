@@ -16,7 +16,9 @@ def main() -> None:
     location = os.path.dirname(os.path.abspath(__file__))
 
     # Load the configuration
+
     config = load_config(location=location, config_name="gpu_test.yaml")
+
 
     # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
@@ -30,7 +32,8 @@ def main() -> None:
                           max_Iter=config.simulation.iter)
 
     # creat object e.g. free layer of sensor
-    optimizer.creat_real_box(config) # only saves the values to the box does not apply any chages to the files
+    optimizer.creat_shape(config)  # only saves the values to the shape does not apply any chages to the files
+    #optimizer.creat_real_box(config) 
     # from here on the optimizer knows the shape
     
     # initialize bay optimizer
