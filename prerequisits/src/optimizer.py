@@ -164,7 +164,8 @@ class Optimizer:
         # adjust server settings
         box.number_cores = config.server.number_cores
         box.mem_GB = config.server.mem_GB
-        self.logger.info(f"Server settings set to number_cores: {box.number_cores}, mem_GB: {box.mem_GB}")
+        box.gpu = config.server.gpu
+        self.logger.info(f"Server settings set to number_cores: {box.number_cores}, mem_GB: {box.mem_GB}, gpu: {box.gpu}")
 
         self.shape = box
         self.logger.info(f"Box created with {self.shape.get_info_shape()}")

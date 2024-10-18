@@ -2,17 +2,20 @@ import numpy as np
 import os
 from prerequisits.src.configuration import *
 import logging
+import sys
 
 class SimulationSettings:
     # Assuming some basic implementation or properties for SimulationSettings
     def __init__(self, projectName):
         # Initialize some common simulation settings
         self.projectName = projectName
+        self.logger = logging.getLogger(__name__)
 
 
 class Box(SimulationSettings):
     def __init__(self, projectName):
         super().__init__(projectName)  # Initialize the parent class
+
         
     def testGeomatrySettings(self):
         # test if small box smaller as bigBox:
@@ -39,69 +42,6 @@ class Box(SimulationSettings):
     def test_Sim_settings(self):
         if np.abs(self.hfinal - self.hstart) < self.hstep:
             raise ValueError("hrange not propperly defined")
-
-    def set_mx(self, mx):
-        self.mx = mx
-
-    def set_my(self, my):
-        self.my = my
-
-    def set_mz(self, mz):
-        self.mz = mz
-
-    def set_hstart(self, hstart):
-        self.hstart = hstart
-
-    def set_hfinal(self, hfinal):
-        self.hfinal = hfinal
-
-    def set_hstep(self, hstep):
-        self.hstep = hstep
-
-    def set_mfinal(self, mfinal):
-        self.mfinal = mfinal
-
-    def set_mstep(self, mstep):
-        self.mstep = mstep
-
-    def set_hx(self, hx):
-        self.hx = hx
-
-    def set_hy(self, hy):
-        self.hy = hy
-
-    def set_hz(self, hz):
-        self.hz = hz
-
-    def set_tol_fun(self, tol_fun):
-        self.tol_fun = tol_fun
-
-    def set_cg_method(self, cg_method):
-        self.cg_method = cg_method
-
-    def set_precond_iter(self, precond_iter):
-        self.precond_iter = precond_iter
-
-    def set_hmag_on(self, hmag_on):
-        self.hmag_on = hmag_on
-
-    def set_print_hmag(self, print_hmag):
-        self.print_hmag = print_hmag
-
-    def set_verbose(self, verbose):
-        self.verbose = verbose
-
-    def set_p2_file_path(self, p2_file_path):
-        self.p2_file_path = p2_file_path
-
-    def set_xlen(self, xlen):
-        self.xlen = xlen
-
-    def set_ylen(self, ylen):
-        self.ylen = ylen
-
-    def set_zlen(self, zlen):
-        self.zlen = zlen
 
     def set_smallBox_factor(self, smallBox_factor):
         self.smallBox_factor = smallBox_factor
@@ -289,12 +229,13 @@ class Box(SimulationSettings):
         with open(file_path_modifies, 'w') as file:
             file.write(script_content)
 
-    def set_sim_slurm(self, slurm_path, number_cores, mem_GB):
+    def set_sim_slurm(self, slurm_path, number_cores, mem_GB, gpu):
         self.slurm_path = slurm_path
         self.number_cores = number_cores
         self.mem_GB = mem_GB
+        self.qpu = gpu
     
-    def modify_sim_slurm(self, current_script_dir):
+    """def modify_sim_slurm(self, current_script_dir):
 
         # Construct the full path by joining the directory path and filename
         file_path = os.path.join(current_script_dir, self.slurm_path)
@@ -309,9 +250,53 @@ class Box(SimulationSettings):
         script_content = script_content.replace('<description>', str(self.projectName))
         script_content = script_content.replace('--mem=8G', '--mem=' + str(self.mem_GB) )
         script_content = script_content.replace('--cpus-per-task=1', '--cpus-per-task=' + str(self.number_cores) )
+        script_content = script_content.replace('--constraint=nv12', '--constraint=' + str(self.qpu) )
         # Wr ite themodified script content back to the same file
         with open(file_path_modifies, 'w') as file:
-            file.write(script_content)
+            file.write(script_content)"""
+
+    def modify_sim_slurm(self, current_script_dir):
+        """
+        Modifies the SLURM script for simulation.
+
+        Args:
+            current_script_dir (str): The directory containing the current SLURM script.
+        """
+        # Construct the full path by joining the directory path and filename
+        file_path = os.path.join(current_script_dir, self.slurm_path)
+        file_path_modifies = os.path.join(current_script_dir, "operations_Files/" + str(self.projectName) + ".slurm")
+
+        self.logger.debug(f"Modifying SLURM script at '{file_path}'.")
+        
+        # Read the original script content
+        with open(file_path, 'r') as file:
+            script_content = file.read()
+
+        # Modify the script content
+        modifications = {
+            'MODELNAME="<model>"': f'MODELNAME="{self.projectName}"',
+            '<description>': str(self.projectName),
+            '--mem=8G': f'--mem={self.mem_GB}',
+            '--cpus-per-task=1': f'--cpus-per-task={self.number_cores}',
+            '--constraint=nv12': f'--constraint={self.qpu}'
+        }
+        
+        for key, value in modifications.items():
+            if key in script_content:
+                script_content = script_content.replace(key, value)
+                self.logger.debug(f"Replaced '{key}' with '{value}' in SLURM script.")
+            else:
+                self.logger.warning(f"Key '{key}' not found in SLURM script. No replacement made.")
+
+        # Write the modified script content back to a new file
+        try:
+            with open(file_path_modifies, 'w') as file:
+                file.write(script_content)
+                self.logger.debug(f"Successfully wrote the modified SLURM script to '{file_path_modifies}'.")
+        except Exception as e:
+            self.logger.error(f"An error occurred while writing to '{file_path_modifies}': {e}")
+            sys.exit(1)
+
 
     def set_salome_slurm(self, slurm_salome_path, number_cores, mem_GB):
         self.slurm_salome_path = slurm_salome_path
@@ -332,7 +317,7 @@ class Box(SimulationSettings):
 
         logging.debug(f"Modifying salome slurm file: {file_path}")
         script_content = script_content.replace('--job-name="salome_equi_n128_dirac75_2nm"', '--job-name="' + str(self.projectName) + '"')
-        script_content = script_content.replace('--mem=8G', '--mem=' + str(self.mem_GB) )
+        script_content = script_content.replace('mem-per-cpu=8', 'mem-per-cpu=' + str(self.mem_GB) )
         script_content = script_content.replace('--cpus-per-task=4', '--cpus-per-task=' + str(self.number_cores) )
         script_content = script_content.replace('"$SLURM_SUBMIT_DIR"/step2_salome_macroFullLM_2nm.py', '"$SLURM_SUBMIT_DIR"/salome_mesh.py')
         script_content = script_content.replace('step2_salome_macroFullLM_2nm.py', 'salome_mesh.py')
@@ -438,7 +423,8 @@ def creat_default_box(config: Config):
     slurm_path = os.path.join(config.generalSettings.location,"prerequisits/_template_.slurm")
     number_cores = 1
     mem_GB = 12
-    box.set_sim_slurm(slurm_path, number_cores, mem_GB)
+    gpu = 'nv12'
+    box.set_sim_slurm(slurm_path, number_cores, mem_GB, gpu)
     #--------- modify salome slurm-------------
     slurm_salome_path = os.path.join(config.generalSettings.location,"prerequisits/salome.slurm")
     number_cores = 1
