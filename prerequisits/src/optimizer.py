@@ -230,6 +230,18 @@ class Optimizer:
         else:
             self.logger.debug("Database handler not initialized. Cannot update database.")
 
+
+    def creat_shape(self, config: Config):
+        name = config.shape.name 
+        if config.shape.name == "Box":
+            logging.info("Shape is Box")
+            self.creat_real_box(config)
+        elif config.name == "Ellipse":
+            logging.info("Shape is Ellipse")
+            
+        else:
+            logging.error("Shape not recognized")
+            exit()
     
 
 
