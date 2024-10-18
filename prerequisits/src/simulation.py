@@ -71,8 +71,10 @@ class Simmulation():
         # Check for required files
         self.logger.debug("Checking for required files in the 'prerequisits' directory...")
         self.make_all_files_in_dir_executable("prerequisits" )
-        self.check_files_in_folder("prerequisits", ["_template_.krn", "_template_.p2", "_template_.slurm", "tofly3"])
-        self.check_files_in_folder("prerequisits/src", ["box_creator.py", "templet_modify.py", "simulation.py"])
+        if not (self.check_files_in_folder("prerequisits", ["_template_.krn", "_template_.p2", "_template_.slurm", "tofly3"])):
+            sys.exit(1)
+        if not self.check_files_in_folder("prerequisits/src", ["box_creator.py", "templet_modify.py", "simulation.py"]):
+            sys.exit(1)
         self.logger.debug("All required files found in the 'prerequisits' directory.")
 
 
@@ -156,7 +158,7 @@ class Simmulation():
         folder_path = os.path.join(self.location, file_name)
         if not os.path.exists(folder_path):
             with open(folder_path, 'w') as file:
-                self.logger.debug(f"Created file: {folder_path}")
+                #self.logger.debug(f"Created file: {folder_path}")
                 file.write(header)
 
 
@@ -170,7 +172,7 @@ class Simmulation():
             shutil.rmtree(folder_path)  # This deletes the directory and all its contents
             self.logger.debug(f"Deleted existing folder: {folder_path}")
         os.makedirs(folder_path)
-        self.logger.debug(f"Created Folder: {folder_path}")
+        #self.logger.debug(f"Created Folder: {folder_path}")
 
     def create_directory_if_not_exists(self, folder_name ):
         """
@@ -205,7 +207,7 @@ class Simmulation():
             for file in files:
                 file_path = os.path.join(root, file)
                 os.chmod(file_path, 0o755)  # Set executable permission
-                self.logger.debug(f"Made file executable and readable: {file_path}")
+                #self.logger.debug(f"Made file executable and readable: {file_path}")
 
     def check_files_in_folder(self, folder_name, file_names):
         """
@@ -234,8 +236,10 @@ class Simmulation():
                 # return full_path
                 # or
                 # yield full_path
-            sys.exit(1)
+            return False
+            #sys.exit(1)
         self.logger.debug(f"All required files exist: {file_names}")
+        return True
 
     def check_folder_exists(self, folder_name):
         """
@@ -286,33 +290,62 @@ class Simmulation():
             self.logger.error(f"Input param incorrect: {e}")
             sys.exit(1)
 
-    def run_salome_mesh_generation(self, project_name ):
+    def run_salome_mesh_generation(self, project_name, repeat=3): 
         """
         Generates mesh using Salome.
 
         Args:
-            base_dir (str): The base directory path.
             project_name (str): The name of the project.
-            logger (Logger): The logger object for logging messages.
+            repeat (int): Number of times to attempt mesh generation if it fails.
 
         Returns:
-            int: The job ID of the Salome mesh generation process.
+            int: The job ID of the Salome mesh generation process if successful.
         """
         file_path_salome = os.path.join(self.location, "operations_Files/salome_mesh.py")
+        file_path_slurm = os.path.join(self.location, "operations_Files/salome.slurm")
+
+        # Check if the Salome script file exists
         if not os.path.isfile(file_path_salome):
-            self.logger.error(f"File {file_path_salome} does not exist.")
+            self.logger.error(f"Salome script file '{file_path_salome}' does not exist.")
             sys.exit(1)
+        
+        # Check if the Slurm file exists
+        if not os.path.isfile(file_path_slurm):
+            self.logger.error(f"Slurm file '{file_path_slurm}' does not exist.")
+            sys.exit(1)
+
+        # Change file permissions for Slurm script
+        try:
+            subprocess.run(["chmod", "+r", file_path_slurm], check=True)
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to change permissions for '{file_path_slurm}': {e}")
+            sys.exit(1)
+
         self.logger.debug("Initiating mesh generation with Salome...")
 
-        # Execute meshing and wait for completion
-        file_path_slurm = os.path.join(self.location, "operations_Files/salome.slurm")
-        chmod_command = f"chmod +r {file_path_slurm}"
-        os.system(chmod_command)
-        salome_job_id, run_time = self.submit_job_and_wait(file_path_slurm)
-        self.logger.info(f"Salome mesh generation completed in {run_time/60} min.")
-        self.check_files_in_folder("operations_Files",  ["box_mesh.unv"])
-        self.logger.info("Mesh generation complete.")
-        return salome_job_id
+
+
+        self.logger.debug("Initiating mesh generation with Salome...")
+
+        # Attempt mesh generation up to 'repeat' times
+        for attempt in range(1, repeat + 1):
+            try:
+                salome_job_id, run_time = self.submit_job_and_wait(file_path_slurm)
+                self.logger.info(f"Salome mesh generation completed in {run_time / 60:.2f} minutes (Attempt {attempt}/{repeat}).")
+            
+                # Check if the expected output file exists
+                if self.check_files_in_folder("operations_Files", ["box_mesh.unv"]):
+                    self.logger.debug(f"Mesh generation successful after {attempt} attempt(s).")
+                    return salome_job_id
+                else:
+                    self.logger.warning(f"Mesh generation attempt {attempt} failed. File 'box_mesh.unv' not found.")
+            
+            except Exception as e:
+                self.logger.error(f"An error occurred during mesh generation attempt {attempt}: {e}")
+
+        # If we reach here, all attempts have failed
+        self.logger.error(f"Mesh generation failed after {repeat} attempts.")
+        sys.exit(1)
 
 
 

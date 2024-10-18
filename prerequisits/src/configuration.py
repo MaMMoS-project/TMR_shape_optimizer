@@ -35,6 +35,7 @@ class SimulationConfig(BaseModel):
 class ServerConfig(BaseModel):
     number_cores: int
     mem_GB: int
+    gpu: str
 
 class generalSettingsConfig(BaseModel):
     log_level: int
