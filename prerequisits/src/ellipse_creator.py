@@ -10,7 +10,7 @@ import salome
 salome.salome_init()
 import salome_notebook
 notebook = salome_notebook.NoteBook()
-sys.path.insert(0, r'/home/fillies/Documents/UWK_Projects_ClasFil/Bosch/mesch/elypse')
+sys.path.insert(0, r'/ceph/home/fillies/tmr_sensors/automatization')
 
 ###
 ### GEOM component
@@ -20,6 +20,7 @@ import GEOM
 from salome.geom import geomBuilder
 import math
 import SALOMEDS
+import os
 
 
 geompy = geomBuilder.New()
@@ -34,7 +35,7 @@ zlen = 0.01
 
 #air box scaliing factors
 smallBox_factor = 3 #>0
-bixBox_factor = 11   #>smallBox_factor
+bigBox_factor = 11   #>smallBox_factor
 
 
 #mesh param
@@ -58,10 +59,10 @@ Ellipse_1 = geompy.MakeEllipse(None, None, xlen/2, ylen/2)  #radius x, radius y
 Face_1 = geompy.MakeFaceWires([Ellipse_1], 1)
 Extrusion_1 = geompy.MakePrismVecH(Face_1, OZ, zlen)
 smallBox = geompy.MakeBoxDXDYDZ(xlen * smallBox_factor, ylen * smallBox_factor, zlen * smallBox_factor)
-bigBox = geompy.MakeBoxDXDYDZ(xlen * bixBox_factor, ylen * bixBox_factor, zlen * bixBox_factor)
+bigBox = geompy.MakeBoxDXDYDZ(xlen * bigBox_factor, ylen * bigBox_factor, zlen * bigBox_factor)
 geompy.TranslateDXDYDZ(Extrusion_1, 0, 0, -zlen/2)    
 geompy.TranslateDXDYDZ(smallBox, -xlen * smallBox_factor/2, -ylen * smallBox_factor/2, -zlen * smallBox_factor/2)
-geompy.TranslateDXDYDZ(bigBox, -xlen * bixBox_factor/2, -ylen * bixBox_factor/2, -zlen * bixBox_factor/2)
+geompy.TranslateDXDYDZ(bigBox, -xlen * bigBox_factor/2, -ylen * bigBox_factor/2, -zlen * bigBox_factor/2)
 Cut_1 = geompy.MakeCutList(bigBox, [smallBox], True)
 Cut_2 = geompy.MakeCutList(smallBox, [Extrusion_1], True)
 [geomObj_1, geomObj_2, geomObj_3, geomObj_4, geomObj_5, geomObj_6, geomObj_7, geomObj_8, geomObj_9] = geompy.GetGlueFaces( [Extrusion_1, Cut_1, Cut_2], 1e-07)
@@ -138,11 +139,10 @@ a3_1 = Mesh_1.GroupOnGeom(a3,'3',SMESH.VOLUME)
 isDone = Mesh_1.Compute()
 [ a1_1, a2_1, a3_1 ] = Mesh_1.GetGroups()
 try:
-  Mesh_2.ExportUNV( r'/ceph/home/fillies/tmr_sensor_sensors/automatization/operations_Files/box_mesh.unv', 0 )
+  Mesh_1.ExportUNV( r'/ceph/home/fillies/tmr_sensor_sensors/automatization/operations_Files/mesh.unv', 0 )
   pass
 except:
   print('ExportUNV() failed. Invalid file name?')
-
 
 ## Set names of Mesh objects
 smesh.SetName(NETGEN_1D_2D_3D.GetAlgorithm(), 'NETGEN 1D-2D-3D')

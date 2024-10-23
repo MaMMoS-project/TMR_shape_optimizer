@@ -385,6 +385,11 @@ class PostProc:
         else:
             file_path = os.path.join(location, f"{iter}.png")
 
+        try:
+            plt.savefig(file_path)
+        except:
+            self.logger.warning(f"Could not save plot to {file_path}")
+            
         plt.savefig(file_path)
         plt.close()
         self.logger.debug(f"Saved plot to {file_path}")

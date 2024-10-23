@@ -7,7 +7,7 @@ import shutil
 import logging
 import time
 
-from prerequisits.src.templet_modify import Box
+from prerequisits.src.shape import *
 
 
 
@@ -73,7 +73,7 @@ class Simmulation():
         self.make_all_files_in_dir_executable("prerequisits" )
         if not (self.check_files_in_folder("prerequisits", ["_template_.krn", "_template_.p2", "_template_.slurm", "tofly3"])):
             sys.exit(1)
-        if not self.check_files_in_folder("prerequisits/src", ["box_creator.py", "templet_modify.py", "simulation.py"]):
+        if not self.check_files_in_folder("prerequisits/src", ["box_creator.py", "shape.py", "simulation.py"]):
             sys.exit(1)
         self.logger.debug("All required files found in the 'prerequisits' directory.")
 
@@ -98,7 +98,7 @@ class Simmulation():
         self.check_folder_exists(f"{self.location}/output/{self.iter}/salome/slurm-{salome_job_id}" )
         
         self.logger.debug("Mesh generation complete. Transforming mesh format with tofly3...")
-        os.system(f"{self.location}/prerequisits/tofly3 -e 1,2 {self.location}/operations_Files/box_mesh.unv {self.location}/operations_Files/{project_name}.fly")
+        os.system(f"{self.location}/prerequisits/tofly3 -e 1,2 {self.location}/operations_Files/mesh.unv {self.location}/operations_Files/{project_name}.fly")
 
         # Check if essential files exist and make them accessible for simulation
         self.check_and_make_accessible(["slurm", "fly", "p2", "krn"],project_name)
@@ -273,22 +273,9 @@ class Simmulation():
         Returns:
             None
         """
-        try:
-            self.shape.testGeomatrySettings()
-            self.shape.modify_geo_settings(self.location)
+        
+        self.shape.apply_all_modifications(self.location)
 
-            self.shape.test_Sim_settings()
-            self.shape.modify_sim_settings(self.location)
-
-            self.shape.modify_element_specs(self.location)
-
-            self.shape.modify_sim_slurm(self.location)
-
-            self.shape.modify_salome_slurm(self.location)
-            self.logger.info("Shallow test of input parameters passed")
-        except Exception as e:
-            self.logger.error(f"Input param incorrect: {e}")
-            sys.exit(1)
 
     def run_salome_mesh_generation(self, project_name, repeat=3): 
         """
@@ -334,11 +321,11 @@ class Simmulation():
                 self.logger.info(f"Salome mesh generation completed in {run_time / 60:.2f} minutes (Attempt {attempt}/{repeat}).")
             
                 # Check if the expected output file exists
-                if self.check_files_in_folder("operations_Files", ["box_mesh.unv"]):
+                if self.check_files_in_folder("operations_Files", ["mesh.unv"]):
                     self.logger.debug(f"Mesh generation successful after {attempt} attempt(s).")
                     return salome_job_id
                 else:
-                    self.logger.warning(f"Mesh generation attempt {attempt} failed. File 'box_mesh.unv' not found.")
+                    self.logger.warning(f"Mesh generation attempt {attempt} failed. File 'mesh.unv' not found.")
             
             except Exception as e:
                 self.logger.error(f"An error occurred during mesh generation attempt {attempt}: {e}")

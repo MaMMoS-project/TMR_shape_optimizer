@@ -1,10 +1,10 @@
 from prerequisits.src.helper import *
 from prerequisits.src.simulation import *
-from prerequisits.src.templet_modify import *
+from prerequisits.src.shape import *
 from prerequisits.src.postProc import *
 from prerequisits.src.database_handler import *
 from prerequisits.src.configuration import *
-from prerequisits.src.templet_modify import *
+from prerequisits.src.shape import *
 from bayes_opt import BayesianOptimization, UtilityFunction
 
 import copy
@@ -45,7 +45,9 @@ class Optimizer:
         self.database_handler = None
 
         # True if results should not be updated into db
-        self.read_only = True
+        self.read = True
+        self.write = False
+
 
 
 
@@ -66,20 +68,24 @@ class Optimizer:
         self.logger.debug(f"Post-Processing results will be saved at {config.postProc_global_path}")
 
         #redd in data from database
-        self.read_only = config.read_only
-        if self.read_only:
-            self.logger.info("Database opened in read-only mode no data will be saved. Which is not nice try to colaberate :/")
+        self.read = config.read
+        self.write = config.write
+        if self.read and self.write:
+            self.logger.info("Database opened in read and write mode.")
+        elif self.read:
+            self.logger.info("Database opened in only in read mode.")
+        elif self.write:
+            self.logger.info("Database opened in only in write mode.")
         
-        if self.optimizer is not None and not self.read_only:
+        if self.optimizer is not None and self.read:
             self.logger.info("Reading Data from Database")
             self.load_data_from_database(self.database_handler)
+
         else:
             self.logger.error("trying to read data but no optimizer created yet to pass to")
 
         
-        # if the database is used also the first shape has to be loaded from the database
-        self.logger.info("Overriding first shape from database")
-        self.shape = self.get_initial_shape()
+        
 
 
     def load_data_from_database(self, database_handler):
@@ -109,66 +115,6 @@ class Optimizer:
 
         
 
-    def create_default_box(self):
-        box = creat_default_box(location = self.location)
-        self.logger.info("Default Box created")
-
-        #adjust shape so that simulation will be over proper intervall
-        box.hstart = 1
-        box.hfinal = 0.0
-        box.hstep = -0.5
-        self.logger.info(f"Magenetig fieldrange set to hstart: {box.hstart}, hfinal: {box.hfinal}, hstep: {box.hstep}")
-
-        #adjust mesh
-            #mesh param
-        box.main_Mesh_min = 0.1
-        box.main_mesh_max = 1.0
-        box.object_Mesh_max = 0.8
-        self.logger.info(f"Mesh set to main_Meash_min: {box.main_Mesh_min}, main_mesh_max: {box.main_mesh_max}, object_Mesh_max: {box.object_Mesh_max}")
-
-        self.shape = box
-        self.logger.info(f"Box created with {box.get_info_shape()}")
-
-
-    def creat_real_box(self, config: Config):
-        """
-        Create a real box with the given name.
-        Not best practic but so far hardcode the specifics of the box in here.
-        Olny saves the values to the bx does not apply any changes!!
-
-        Args:
-            name (str): The name of the box.
-
-        Returns:
-            None
-
-        Raises:
-            None
-        """
-        #self.logger.info("Creating real Box")
-
-        box = creat_default_box(config)
-
-        # adjust shape so that simulation will be over proper interval
-        box.hstart = config.simulation.hstart
-        box.hfinal = config.simulation.hfinal
-        box.hstep = config.simulation.hstep
-        self.logger.info(f"Magnetic field range set to hstart: {box.hstart}, hfinal: {box.hfinal}, hstep: {box.hstep}")
-
-        # adjust mesh parameters
-        box.main_Mesh_min = config.shape.main_Mesh_min
-        box.main_mesh_max = config.shape.main_mesh_max
-        box.object_Mesh_max = config.shape.object_Mesh_max
-        self.logger.info(f"Mesh set to main_Mesh_min: {box.main_Mesh_min}, main_mesh_max: {box.main_mesh_max}, object_Mesh_max: {box.object_Mesh_max}")
-
-        # adjust server settings
-        box.number_cores = config.server.number_cores
-        box.mem_GB = config.server.mem_GB
-        box.gpu = config.server.gpu
-        self.logger.info(f"Server settings set to number_cores: {box.number_cores}, mem_GB: {box.mem_GB}, gpu: {box.gpu}")
-
-        self.shape = box
-        self.logger.info(f"Box created with {self.shape.get_info_shape()}")
 
     def bayesian_optimization_setup(self, config: Config):
             """
@@ -198,7 +144,13 @@ class Optimizer:
             if config.simulation.zlen_start > config.simulation.zlen_stop:
                 logging.error("zlen_start has to be smaller than zlen_stop")
                 exit()
-            pbounds = {'xlen': (config.simulation.xlen_start, config.simulation.xlen_stop), 'ylen': (config.simulation.ylen_start, config.simulation.ylen_stop), 'zlen': (config.simulation.zlen_start, config.simulation.zlen_stop)}
+
+            para_names = self.shape.param_names
+            if len(para_names) == 0:
+                logging.error("No parameter names found")
+                exit()
+
+            pbounds = {para_names[0]: (config.simulation.xlen_start, config.simulation.xlen_stop), para_names[1]: (config.simulation.ylen_start, config.simulation.ylen_stop), para_names[2]: (config.simulation.zlen_start, config.simulation.zlen_stop)}
 
             
 
@@ -226,19 +178,27 @@ class Optimizer:
             None
         """
         if self.database_handler is not None:
-            number_inserted = self.database_handler.query_and_count(f"INSERT INTO shapes (xlen, ylen, zlen, linDis) VALUES ({param[0]}, {param[1]}, {param[2]}, {label})")
-            self.logger.info(f"Updated {number_inserted} database with parameters: {param} and label: {label}")
+            # Check if Data is in database
+            data = self.database_handler.query(f"SELECT * FROM shapes WHERE xlen = {param[0]} AND ylen = {param[1]} AND zlen = {param[2]}")
+            if data:
+                self.logger.warning(f"Data for parameters {param} already in database. Skipping update.")
+            else:
+                number_inserted = self.database_handler.query_and_count(f"INSERT INTO shapes (xlen, ylen, zlen, linDis) VALUES ({param[0]}, {param[1]}, {param[2]}, {label})")
+                self.logger.info(f"Updated {number_inserted} database with parameters: {param} and label: {label}")
         else:
             self.logger.debug("Database handler not initialized. Cannot update database.")
 
 
     def creat_shape(self, config: Config):
         name = config.shape.name 
-        if config.shape.name == "Box":
+        if name == "Box":
             logging.info("Shape is Box")
-            self.creat_real_box(config)
-        elif config.name == "Ellipse":
+            self.shape = Box(config)
+
+
+        elif name == "Ellipse":
             logging.info("Shape is Ellipse")
+            self.shape = Ellipse(config)
             
         else:
             logging.error("Shape not recognized")
@@ -262,6 +222,9 @@ class Optimizer:
                 self.current_simulation = Simmulation(self.shape,  self.location, iter=self.iter)
                 self.current_simulation.run_Simulation()        # does not return specific Data but saves the data to file where post process can access
                 self.logger.debug("Starting post-processing")
+                
+                               
+                
                 try:
                     #perform post processing
                     postProc = self.post_process(i)
@@ -274,11 +237,13 @@ class Optimizer:
                     self.logger.info(f"Result of Post-Processing: lin Hysterese Distance: {label}")
                     
                     #save results globaly
-                    if not self.read_only and self.database_handler is not None:
+                    if self.write and self.database_handler is not None:
                         self.update_database(params, label)
 
                         # also save image of post process here
+                        
                         postProc.save_plot(self.database_handler.get_postProc_golbal_path(), params, full_path=False)
+
 
                     #save results localy
                     append_line_to_file(self.location + '/output/labels.txt', params, label)
@@ -301,23 +266,18 @@ class Optimizer:
         new_suggestion = self.optimizer.suggest(self.utility_bayesian)
         self.logger.info(f"Init shape to: {new_suggestion}")
         new_shape = copy.deepcopy(self.shape)
-        new_shape.set_xlen(new_suggestion['xlen'])
-        new_shape.set_ylen(new_suggestion['ylen'])
-        new_shape.set_zlen(new_suggestion['zlen'])
+        new_shape.update_shape(new_suggestion)
 
         return new_shape       
 
     def update_shape(self, params, label):
-        """This function is used to finde the new shape of the box """
          # register old shape:
         self.optimizer.register(params, label)
         #get suggestion for new shape:
         new_suggestion = self.optimizer.suggest(self.utility_bayesian)
         self.logger.debug(f"New Suggestion for shape: {new_suggestion}")
         new_shape = copy.deepcopy(self.shape)
-        new_shape.set_xlen(new_suggestion['xlen'])
-        new_shape.set_ylen(new_suggestion['ylen'])
-        new_shape.set_zlen(new_suggestion['zlen'])
+        new_shape.update_shape(new_suggestion)
 
         return new_shape
 

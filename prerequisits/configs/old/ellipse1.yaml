@@ -7,20 +7,21 @@ database:
 
 shape:
   name: "Ellipse"           # Ellipse, Box     are so far supportet
+  init_r1: 1
+  init_r2: 0.1
+  init_h: 0.01
+  
+
+simulation:
+  sim_name: 'ellips1'
+  iter: 2000
   main_Mesh_min: 1e-4
   main_mesh_max: 1.0
   object_Mesh_max: 5e-3  # 5e-9
-
-simulation:
-  sim_name: 'acq_t1'
-  iter: 2000
-  init_xlen: 1
-  init_ylen: 0.1
-  init_zlen: 0.01
   xlen_start: 1
   xlen_stop: 2
-  ylen_start: 0.1
-  ylen_stop: 0.2
+  ylen_start: 0.01
+  ylen_stop: 0.02
   zlen_start: 0.01
   zlen_stop: 0.02
   hstart: 0.5
@@ -36,7 +37,8 @@ optimizer:
 
 server:
   number_cores: 4
-  mem_GB: 20
+  mem_GB: 30
+  gpu: 'nv16'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
 
 generalSettings:
   log_level: 2

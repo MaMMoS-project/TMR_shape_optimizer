@@ -1,24 +1,39 @@
 from pydantic import BaseModel
 import yaml
 import os
+from typing import Optional, Union
 
 class DatabaseConfig(BaseModel):
     use_DB: bool
-    read_only: bool
+    read: bool
+    write: bool
     name: str
     db_path: str
     postProc_global_path: str
     
 
-class ShapeConfig(BaseModel):
-    name: str
-    main_Mesh_min: float
-    main_mesh_max: float
-    object_Mesh_max: float
+class BoxConfig(BaseModel):
+    name: str = "Box"
+    init_xlen: float
+    init_ylen: float
+    init_zlen: float
+
+class EllipseConfig(BaseModel):
+    name: str = "Ellipse"
+    init_r1: float
+    init_r2: float
+    init_h: float
+
+# Define the ShapeConfig as a Union of Box and Ellipse configurations
+ShapeConfig = Union[BoxConfig, EllipseConfig]
+    
 
 class SimulationConfig(BaseModel):
     sim_name: str
     iter: int
+    main_Mesh_min: float
+    main_mesh_max: float
+    object_Mesh_max: float
     xlen_start: float
     xlen_stop: float
     ylen_start: float
@@ -28,9 +43,6 @@ class SimulationConfig(BaseModel):
     hstart: float
     hfinal: float
     hstep: float
-    init_xlen: float
-    init_ylen: float
-    init_zlen: float
 
 class ServerConfig(BaseModel):
     number_cores: int
