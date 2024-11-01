@@ -25,8 +25,8 @@ simulation:
   ylen_stop: 1
   zlen_start: 0.05
   zlen_stop: 1
-  hstart: 0.5
-  hfinal: -0.3
+  hstart: 1.0
+  hfinal: -1.0
   hstep: -0.0001
 
 optimizer:
@@ -38,8 +38,8 @@ optimizer:
 
 server:
   number_cores: 4
-  mem_GB: 40
-  gpu: 'nv16'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
+  mem_GB: 50
+  gpu: 'nv32'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
 
 generalSettings:
   log_level: 2

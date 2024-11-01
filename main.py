@@ -17,7 +17,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="1bu14160515001002.yaml")
+    config = load_config(location=location, config_name="2su6100515001002.yaml")
 
 
     # set location of simulation to the location of the main.py file

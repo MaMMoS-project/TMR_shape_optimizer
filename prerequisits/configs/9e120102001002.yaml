@@ -7,30 +7,30 @@ database:
   postProc_global_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/cube' # Abs path to folder where plots of post proc will be saved also need to stay global                                
 
 shape:
-  name: "Box"           # Ellipse, Box     are so far supportet
-  init_xlen: 15
-  init_ylen: 1.0
+  name: "Box"           # Ellipse, Box, Stick     are so far supportet
+  init_xlen: 1
+  init_ylen: 0.1
   init_zlen: 0.01
   
 
 simulation:
-  sim_name: '1bu14160515001002'
+  sim_name: '9e120102001002'
   iter: 2000000
   main_Mesh_min: 1e-4
   main_mesh_max: 1.0
   object_Mesh_max: 5e-3  # 5e-9
-  xlen_start: 14.5
-  xlen_stop: 15.5
-  ylen_start: 0.9
-  ylen_stop: 1.1
+  xlen_start: 1
+  xlen_stop: 2
+  ylen_start: 0.1
+  ylen_stop: 0.2
   zlen_start: 0.01
-  zlen_stop: 0.015
+  zlen_stop: 0.02
   hstart: 0.5
   hfinal: -0.3
-  hstep: -0.00005
+  hstep: -0.0001
 
 optimizer:
-  acq_kind: 'ucb'           # 'ei', 'ucb', 'poi' supported
+  acq_kind: 'ei'           # 'ei', 'ucb', 'poi' supported
   kappa: 2.5                # 2.576
   xi: 0.0                   # 0.0
   kappa_decay: 1.0          # 1.0
@@ -38,8 +38,8 @@ optimizer:
 
 server:
   number_cores: 4
-  mem_GB: 50
-  gpu: 'nv32'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
+  mem_GB: 20
+  gpu: 'nv12'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
 
 generalSettings:
   log_level: 2

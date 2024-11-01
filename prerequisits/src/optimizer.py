@@ -7,6 +7,7 @@ from prerequisits.src.configuration import *
 from prerequisits.src.shape import *
 from bayes_opt import BayesianOptimization, UtilityFunction
 
+import math
 import copy
 import logging
 
@@ -166,7 +167,7 @@ class Optimizer:
             self.utility_bayesian = UtilityFunction(kind=config.optimizer.acq_kind, kappa=config.optimizer.kappa, xi=config.optimizer.xi, kappa_decay=config.optimizer.kappa_decay, kappa_decay_delay=config.optimizer.kappa_decay_delay)
             self.logger.info(f"Bo setup with Acquisation function: {config.optimizer.acq_kind}, kappa: {config.optimizer.kappa}, xi: {config.optimizer.xi}, kappa_decay: {config.optimizer.kappa_decay}, kappa_decay_delay: {config.optimizer.kappa_decay_delay}")
 
-    def update_database(self, param, label):
+    def update_database(self, param, label, eta=0.1):
         """
         Update the database with the given parameters and label.
 
@@ -181,7 +182,8 @@ class Optimizer:
             # Check if Data is in database
             data = self.database_handler.query(f"SELECT * FROM shapes WHERE xlen = {param[0]} AND ylen = {param[1]} AND zlen = {param[2]}")
             if data:
-                self.logger.warning(f"Data for parameters {param} already in database. Skipping update.")
+                self.logger.error(f"Data for parameters {data[0][3]} in database has different label {label}.")
+
             else:
                 number_inserted = self.database_handler.query_and_count(f"INSERT INTO shapes (xlen, ylen, zlen, linDis) VALUES ({param[0]}, {param[1]}, {param[2]}, {label})")
                 self.logger.info(f"Updated {number_inserted} database with parameters: {param} and label: {label}")
@@ -199,6 +201,11 @@ class Optimizer:
         elif name == "Ellipse":
             logging.info("Shape is Ellipse")
             self.shape = Ellipse(config)
+            
+        
+        elif name == "Stick":
+            logging.info("Shape is Stick")
+            self.shape = Stick(config)
             
         else:
             logging.error("Shape not recognized")

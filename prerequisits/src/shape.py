@@ -611,6 +611,143 @@ class Box(Shape):
 
 
 
+class Stick(Shape):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        
+        self.modifyer_path = os.path.join(config.generalSettings.location, "prerequisits/src/stick_creator.py")
+        self.param_names = ["xlen", "ylen", "zlen"]
+        #target stick size (this is the magnet)
+        self.xlen = config.shape.init_xlen
+        self.ylen = config.shape.init_ylen
+        self.zlen = config.shape.init_zlen
+                
+        self.testSpecificSape()
+        logging.info(f"Stick Shape initialized with shape [{self.xlen}, {self.ylen}, {self.zlen}], and shallow input Tests")
+
+    def disturbe_shape(self, percent=5):
+        #randmly add or subracts up to 5 % of value
+        self.xlen = self.xlen + self.xlen * np.random.uniform(-percent/100, percent/100)
+        self.ylen = self.ylen + self.ylen * np.random.uniform(-percent/100, percent/100)
+        self.zlen = self.zlen + self.zlen * np.random.uniform(-percent/100, percent/100)
+
+    def update_shape(self, param):
+        if len(param) != 3:
+            logging.error("Stick needs to have 3 values (x,y,z)")
+            sys.exit()
+        self.xlen = param['xlen']
+        self.ylen = param['ylen']
+        self.zlen = param['zlen']
+
+
+    def testSpecificSape(self):
+        if self.xlen < 0:
+            logging.error("xlen needs to be bigger than 0")
+            sys.exit()
+        if self.ylen < 0:
+            logging.error("ylen needs to be bigger than 0")
+            sys.exit()
+        if self.zlen < 0:
+            logging.error("ylen needs to be bigger than 0")
+            sys.exit()
+
+    def modify_specific_shape_setting(self, location):
+        """
+        Modifies the geometry settings script.
+
+        Args:
+            location (str): The directory containing the geometry settings script.
+        """
+        # Construct the full path by joining the directory path and filename
+        file_path = os.path.join(location, self.modifyer_path)
+        file_path_modifies = os.path.join(location, "operations_Files/salome_mesh.py")
+
+        self.logger.debug(f"Modifying geometry settings at '{file_path}'.")
+        
+        # Read the original script content
+        try:
+            with open(file_path, 'r') as file:
+                script_content = file.read()
+                self.logger.debug("Successfully read the original geometry settings script.")
+        except FileNotFoundError:
+            self.logger.error(f"Geometry settings file '{file_path}' does not exist.")
+            sys.exit(1)
+        except Exception as e:
+            self.logger.error(f"An error occurred while reading '{file_path}': {e}")
+            sys.exit(1)
+
+        # Modify the script content
+        modifications = {
+            '/ceph/home/fillies/tmr_sensor_sensors/automatization': str(location),
+            'xlen = 1': f'xlen = {self.xlen}',
+            'ylen = 0.1': f'ylen = {self.ylen}',
+            'zlen = 0.01': f'zlen = {self.zlen}',
+            'smallBox_factor = 3': f'smallBox_factor = {self.smallBox_factor}',
+            'bigBox_factor = 11': f'bigBox_factor = {self.bigBox_factor}',
+            'main_Meash_min = 0.00001': f'main_Meash_min = {self.main_Mesh_min}',
+            'main_mesh_max = 1': f'main_mesh_max = {self.main_mesh_max}',
+            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}'
+        }
+        
+        for key, value in modifications.items():
+            if key in script_content:
+                script_content = script_content.replace(key, value)
+                self.logger.debug(f"Replaced '{key}' with '{value}' in geometry settings script.")
+            else:
+                self.logger.warning(f"Key '{key}' not found in geometry settings script. No replacement made.")
+
+        # Write the modified script content back to a new file
+        try:
+            with open(file_path_modifies, 'w') as file:
+                file.write(script_content)
+                self.logger.debug(f"Successfully wrote the modified geometry settings script to '{file_path_modifies}'.")
+        except Exception as e:
+            self.logger.error(f"An error occurred while writing to '{file_path_modifies}': {e}")
+            sys.exit(1)
+    
+        
+    def print_shape_info(self):
+        print(f"Project Name: {self.projectName}")
+        print(f"stick Dimensions: xlen={self.xlen}, ylen={self.ylen}, zlen={self.zlen}")
+        print(f"Small Box Factor: {self.smallBox_factor}, Big Box Factor: {self.bigBox_factor}")
+        print(f"Mesh Settings: main_Mesh_min={self.main_Mesh_min}, main_mesh_max={self.main_mesh_max}, object_Mesh_max={self.object_Mesh_max}")
+        print(f"Simulation Settings: mx={self.mx}, my={self.my}, mz={self.mz}, hstart={self.hstart}, hfinal={self.hfinal}, hstep={self.hstep}, mfinal={self.mfinal}, mstep={self.mstep}")
+        print(f"Field: hx={self.hx}, hy={self.hy}, hz={self.hz}")
+        print(f"Minimizer: tol_fun={self.tol_fun}, cg_method={self.cg_method}, precond_iter={self.precond_iter}, hmag_on={self.hmag_on}, print_hmag={self.print_hmag}, verbose={self.verbose}")
+        print(f"File Paths: p2_file_path={self.p2_file_path}, modifyer_path={self.modifyer_path}, element_specs_path={self.element_specs_path}")
+        print(f"Slurm Paths: sim_slurm_path={self.slurm_path}, salome_slurm_path={self.slurm_salome_path}")
+
+    def print_shape_info_short(self):
+        print(f"Project Name: {self.projectName}")
+        print(f"stick Dimensions: xlen={self.xlen}, ylen={self.ylen}, zlen={self.zlen}")
+
+    def get_info_shape(self):
+        return [self.xlen, self.ylen, self.zlen]
+ 
+    def save_stick_info_to_file(self, current_dir):
+        # Construct the file path for 'shape_info.txt' in the current directory
+        file_path = os.path.join(current_dir, 'shape_info.txt')
+
+        with open(file_path, 'w') as file:
+            file.write(f"Project Name: {self.projectName}\n")
+            # Add other information as in the previous example...
+            file.write(f"Project Name: {self.projectName}\n")
+            file.write(f"stick Dimensions: xlen={self.xlen}, ylen={self.ylen}, zlen={self.zlen}\n")
+            file.write(f"Small stick Factor: {self.smallBox_factor}, Big Box Factor: {self.bigBox_factor}\n")
+            file.write(f"Mesh Settings: main_Mesh_min={self.main_Mesh_min}, main_mesh_max={self.main_mesh_max}, object_Mesh_max={self.object_Mesh_max}\n")
+            file.write(f"Simulation Settings: mx={self.mx}, my={self.my}, mz={self.mz}, hstart={self.hstart}, hfinal={self.hfinal}, hstep={self.hstep}, mfinal={self.mfinal}, mstep={self.mstep}\n")
+            file.write(f"Field: hx={self.hx}, hy={self.hy}, hz={self.hz}\n")
+            file.write(f"Minimizer: tol_fun={self.tol_fun}, cg_method={self.cg_method}, precond_iter={self.precond_iter}, hmag_on={self.hmag_on}, print_hmag={self.print_hmag}, verbose={self.verbose}\n")
+            file.write(f"File Paths: p2_file_path={self.p2_file_path}, modifyer_path={self.modifyer_path}, element_specs_path={self.element_specs_path}\n")
+            file.write(f"Slurm Paths: sim_slurm_path={self.slurm_path}, salome_slurm_path={self.slurm_salome_path}\n")
+            
+        print(f"stick information saved to '{file_path}'")
+
+
+
+
+
+
 
 
  
