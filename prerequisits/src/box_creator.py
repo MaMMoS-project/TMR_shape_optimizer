@@ -34,7 +34,7 @@ zlen = 0.01
 
 #air box scaliing factors
 smallBox_factor = 3 #>0
-bixBox_factor = 11   #>smallBox_factor
+bigBox_factor = 11   #>smallBox_factor
 
 
 #mesh param
@@ -55,10 +55,10 @@ OZ_1 = geompy.MakeVectorDXDYDZ(0, 0, 1)
 
 targetBox = geompy.MakeBoxDXDYDZ(xlen, ylen, zlen)
 Box_1 = geompy.MakeBoxDXDYDZ(xlen * smallBox_factor, ylen * smallBox_factor, zlen * smallBox_factor)
-Box_2 = geompy.MakeBoxDXDYDZ(xlen * bixBox_factor, ylen * bixBox_factor, zlen * bixBox_factor)
+Box_2 = geompy.MakeBoxDXDYDZ(xlen * bigBox_factor, ylen * bigBox_factor, zlen * bigBox_factor)
 geompy.TranslateDXDYDZ(targetBox, -xlen/2, -ylen/2, -zlen/2)
 geompy.TranslateDXDYDZ(Box_1, -xlen * smallBox_factor/2, -ylen * smallBox_factor/2, -zlen * smallBox_factor/2)
-geompy.TranslateDXDYDZ(Box_2, -xlen * bixBox_factor/2, -ylen * bixBox_factor/2, -zlen * bixBox_factor/2)
+geompy.TranslateDXDYDZ(Box_2, -xlen * bigBox_factor/2, -ylen * bigBox_factor/2, -zlen * bigBox_factor/2)
 box1Cut = geompy.MakeCutList(Box_1, [targetBox], True)
 box2Cut = geompy.MakeCutList(Box_2, [Box_1], True)
 
@@ -137,7 +137,7 @@ isDone = Mesh_2.Compute()
 try:
 
   
-  Mesh_2.ExportUNV( r'/ceph/home/fillies/tmr_sensor_sensors/automatization/operations_Files/box_mesh.unv', 0 )
+  Mesh_2.ExportUNV( r'/ceph/home/fillies/tmr_sensor_sensors/automatization/operations_Files/mesh.unv', 0 )
   pass
 except:
   print('ExportUNV() failed. Invalid file name?')

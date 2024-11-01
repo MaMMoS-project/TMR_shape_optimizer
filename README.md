@@ -103,4 +103,14 @@ each box is discribed via three maram xlen, ylen, zlen
 output parameter:
 len of lin demagnetizatuion curve
 
+Creat your own Database:
+sqlite3 new_box504.db
+CREATE TABLE shapes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    xlen REAL,
+    ylen REAL,
+    zlen REAL,
+    linDis REAL
+);
+
 

@@ -17,7 +17,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="gpu_test.yaml")
+    config = load_config(location=location, config_name="2su6100515001002.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -38,7 +38,7 @@ def main() -> None:
     
     # initialize bay optimizer
     optimizer.bayesian_optimization_setup(config)
-    logging.info("Optimization setup done")
+    logging.debug("Optimization setup done")
 
     if config.database.use_DB:
         optimizer.setup_database(config.database)
