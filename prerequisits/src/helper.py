@@ -56,7 +56,7 @@ def setup_logging(log_level: int, base_dir, log_file="master.log", max_size=10*1
     logger.setLevel(log_level)
     logger.info("Logging configured successfully.")
 
-def append_line_to_file(file_path, param, label):
+def append_line_to_file(file_path, param, label, config, slome_runtime, micro_mag_runtime, num_tet ):
     """
     Appends a line to a file with the specified file path.
 
@@ -71,7 +71,11 @@ def append_line_to_file(file_path, param, label):
     """
     try:
         with open(file_path, 'a') as file:
-            line = f"{param} {label}\n"
+            # if first appen header
+            if file.tell() == 0:
+                header = "object_Mesh_max | salome_runtime | micro_mag_runtime | num_tet label\n"
+                file.write(header)
+            line = f"{config.simulation.object_Mesh_max} {slome_runtime/60} {micro_mag_runtime/60} {num_tet} {label}\n"
             file.write(line)
     except FileNotFoundError:
         print("File not found.")

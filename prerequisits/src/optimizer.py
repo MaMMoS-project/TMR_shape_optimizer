@@ -14,7 +14,7 @@ import logging
 # SUpposed to perform the entiere optimzationThis
 
 class Optimizer:
-    def __init__(self,locattion, max_Iter = None):
+    def __init__(self,locattion,config, max_Iter = None):
         # initialze logger
         """setup_logging(log_level, locattion )  # Assuming 3 is a high verbosity level equivalent to DEBUG
         logger = logging.getLogger(__name__)
@@ -48,6 +48,8 @@ class Optimizer:
         # True if results should not be updated into db
         self.read = True
         self.write = False
+
+        self.config = config
 
 
 
@@ -213,58 +215,49 @@ class Optimizer:
     
 
 
-    def optimize(self):
+    def optimize(self, mesh_param):
         # check if box is created
-        if self.shape is None:
-            self.logger.error("No shape created yet")
-            return
         
-               
-        if self.max_Iter is not None:
-            self.logger.info(f"Starting optimization with {self.max_Iter} Iterations")
-            
-            for i in range(1, self.max_Iter + 1):
-                self.iter = i
-                self.logger.info(f"Starting Iteration {i}")
-                self.current_simulation = Simmulation(self.shape,  self.location, iter=self.iter)
-                self.current_simulation.run_Simulation()        # does not return specific Data but saves the data to file where post process can access
-                self.logger.debug("Starting post-processing")
-                
-                               
-                
-                try:
-                    #perform post processing
-                    postProc = self.post_process(i)
-                    self.current_simulation.set_results(postProc.get_results())
-                    self.all_simulations.append(copy.deepcopy(self.current_simulation))
-
-                    #get results of post processing
-                    params= self.shape.get_info_shape()
-                    label = self.current_simulation.get_results().get_x_max_lin()
-                    self.logger.info(f"Result of Post-Processing: lin Hysterese Distance: {label}")
-                    
-                    #save results globaly
-                    if self.write and self.database_handler is not None:
-                        self.update_database(params, label)
-
-                        # also save image of post process here
+        self.iter = mesh_param
+        self.current_simulation = Simmulation(self.shape,  self.location, iter=self.iter)
+        slome_runtime, micro_mag_runtime, num_tet = self.current_simulation.run_Simulation()        # does not return specific Data but saves the data to file where post process can access
+        self.logger.debug("Starting post-processing")
+        
                         
-                        postProc.save_plot(self.database_handler.get_postProc_golbal_path(), params, full_path=False)
+        
+        try:
+            #perform post processing
+            postProc = self.post_process(self.iter)
+            self.current_simulation.set_results(postProc.get_results())
+            self.all_simulations.append(copy.deepcopy(self.current_simulation))
+
+            #get results of post processing
+            params= self.shape.get_info_shape()
+            label = self.current_simulation.get_results().get_x_max_lin()
+            self.logger.info(f"Result of Post-Processing: lin Hysterese Distance: {label}")
+            
+            #save results globaly
+            if self.write and self.database_handler is not None:
+                self.update_database(params, label)
+
+                # also save image of post process here
+                
+                postProc.save_plot(self.database_handler.get_postProc_golbal_path(), params, full_path=False)
 
 
-                    #save results localy
-                    append_line_to_file(self.location + '/output/labels.txt', params, label)
+            #save results localy
+            append_line_to_file(self.location + '/output/labels.txt', params, label, self.config, slome_runtime, micro_mag_runtime, num_tet)
 
-                    #update shape
-                    self.logger.debug("Updating shape")
-                    self.shape = self.update_shape(params, label )
-                    self.logger.info(f"Shape updated to {self.shape.get_info_shape()}")
+            #update shape
+            self.logger.debug("Updating shape")
+            self.shape = self.update_shape(params, label )
+            self.logger.info(f"Shape updated to {self.shape.get_info_shape()}")
 
-                except Exception as e:
-                    self.logger.error(f"Error during post-processing: {str(e)}")
-                    self.logger.info("Disturbing the shape for next Iteration")
-                    self.shape.disturbe_shape()
-                    self.logger.info(f"Shape disturbed to {self.shape.get_info_shape()}")
+        except Exception as e:
+            self.logger.error(f"Error during post-processing: {str(e)}")
+            self.logger.info("Disturbing the shape for next Iteration")
+            self.shape.disturbe_shape()
+            self.logger.info(f"Shape disturbed to {self.shape.get_info_shape()}")
 
 
     

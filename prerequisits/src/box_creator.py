@@ -134,6 +134,19 @@ NETGEN_3D_Parameters_1.SetLocalSizeOnShape(targetBox, object_Mesh_max)
 NETGEN_3D_Parameters_1.SetCheckChartBoundary( 48 )
 isDone = Mesh_2.Compute()
 [ a1_1, a2_1, a3_1, a1_2, a2_2, a3_2 ] = Mesh_2.GetGroups()
+
+tets = a1_1.Size()  #Finde tets
+try:
+  # Specify the file path and name
+  output_file_path = "tets_output.txt"
+
+  # Open the file in write mode and save the tets value
+  with open(output_file_path, "w") as file:
+    file.write(f"Tets Size: {tets}\n")
+except:
+  print('ExportUNV() failed. Invalid file name?')
+
+  
 try:
 
   

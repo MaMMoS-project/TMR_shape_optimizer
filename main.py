@@ -17,10 +17,9 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="2su6100515001002.yaml")
+    config = load_config(location=location, config_name="mesh_ana.yaml")
 
-
-    # set location of simulation to the location of the main.py file
+        # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
 
     setup_logging(log_level=config.generalSettings.log_level, base_dir= config.generalSettings.location )  
@@ -50,6 +49,65 @@ def main() -> None:
 
 
 
+# In your main or any other module
+def mesh_ana() -> None:
+    location = os.path.dirname(os.path.abspath(__file__))
+
+    # Load the configuration
+
+    config = load_config(location=location, config_name="12MSteps.yaml")
+
+        # set location of simulation to the location of the main.py file
+    config.generalSettings.location = location
+
+    setup_logging(log_level=config.generalSettings.log_level, base_dir= config.generalSettings.location )  
+
+    # log config
+    logging.debug(f"Configuration loaded: {config}")
+
+    logging.info("Mesh analysis started")
+
+    #object_Mesh_max: 5e-3  
+    min_mesh = 1e-3
+    max_mesh = 3e-2
+    steps = 10
+    all_mesh = np.logspace(np.log10(min_mesh), np.log10(max_mesh), num=steps)
+    all_mesh = all_mesh[::-1]
+    logging.info(f" Analyzing mesh sizes from {min_mesh} to {max_mesh} with {steps} steps")
+
+
+    for mesh in all_mesh:
+        try:
+            logging.info(f"Mesh analysis with mesh size: {mesh  }")
+            config.simulation.object_Mesh_max = mesh
+
+            optimizer = Optimizer(locattion=config.generalSettings.location , config=config,
+                          max_Iter=config.simulation.iter)
+
+            # creat object e.g. free layer of sensor
+            optimizer.creat_shape(config)  # only saves the values to the shape does not apply any chages to the files
+            #optimizer.creat_real_box(config) 
+            # from here on the optimizer knows the shape
+            
+            # initialize bay optimizer
+            optimizer.bayesian_optimization_setup(config)
+            logging.debug("Optimization setup done")
+
+            if config.database.use_DB:
+                optimizer.setup_database(config.database)
+            else:
+                logging.info("No database used")
+
+            optimizer.optimize(mesh) # runs the optimization changes the file to desired.
+
+
+        except Exception as e:
+            logging.error(f"Error in mesh analysis: {e}")
+            continue
+
+
+
+
 
 
 
@@ -72,5 +130,6 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
     #single_postprocess()
+    mesh_ana()

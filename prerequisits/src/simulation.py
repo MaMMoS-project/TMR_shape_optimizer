@@ -6,6 +6,7 @@ import time
 import shutil
 import logging
 import time
+import glob
 
 from prerequisits.src.shape import *
 
@@ -65,8 +66,11 @@ class Simmulation():
         self.delete_and_create_folder("operations_Files")
         self.create_directory_if_not_exists(f"output")
         self.create_directory_if_not_exists(f"output/graphics")
+        self.create_directory_if_not_exists(f"output/dat_files")
         self.creat_file_if_not_exist("output/labels.txt")
         self.delete_and_create_folder(f"output/{self.iter}")  
+        
+
 
         # Check for required files
         self.logger.debug("Checking for required files in the 'prerequisits' directory...")
@@ -89,16 +93,30 @@ class Simmulation():
 
         # Mesh generation with Salome and format transformation
         self.logger.info("Starting mesh generation with Salome...")
-        salome_job_id = self.run_salome_mesh_generation(project_name )
+        salome_job_id, salome_runtime = self.run_salome_mesh_generation(project_name )
         self.salome_SlurmID = salome_job_id
 
-        # Collect results from Salome
-        self.create_directory_if_not_exists(f"output/{self.iter}/salome" )
-        self.move_simulation_output(f"{self.location}/operations_Files/results/slurm-{salome_job_id}", f"{self.location}/output/{self.iter}/salome")
-        self.check_folder_exists(f"{self.location}/output/{self.iter}/salome/slurm-{salome_job_id}" )
+        #
+        
         
         self.logger.debug("Mesh generation complete. Transforming mesh format with tofly3...")
         os.system(f"{self.location}/prerequisits/tofly3 -e 1,2 {self.location}/operations_Files/mesh.unv {self.location}/operations_Files/{project_name}.fly")
+        # run grep Tet4 *.fly 
+        
+
+        self.create_directory_if_not_exists(f"output/{self.iter}/salome" )
+        self.move_simulation_output(f"{self.location}/operations_Files/mesh.unv", f"{self.location}/output/{self.iter}/salome")
+        self.move_simulation_output(f"{self.location}/operations_Files/results/slurm-{salome_job_id}", f"{self.location}/output/{self.iter}/salome")
+         #Collect results from Salome
+
+        num_tet = self.get_tet4_count(self.location, self.salome_SlurmID)
+        logging.info(f"Number of Tet4 elements: {num_tet}")
+        
+        
+        self.check_folder_exists(f"{self.location}/output/{self.iter}/salome/slurm-{salome_job_id}" )
+        
+        
+        
 
         # Check if essential files exist and make them accessible for simulation
         self.check_and_make_accessible(["slurm", "fly", "p2", "krn"],project_name)
@@ -116,6 +134,16 @@ class Simmulation():
         self.move_simulation_output(f"{self.location}/operations_Files/output/slurm_{microMag_job_id}", f"{self.location}/output/{self.iter}/microMag")
         self.check_folder_exists(f"{self.location}/output/{self.iter}/microMag/slurm_{microMag_job_id}" )
 
+        self.move_and_rename_files_by_pattern(
+            folder_to_search=f"{self.location}/output/{self.iter}/microMag/slurm_{microMag_job_id}",
+            pattern="*.dat",
+            target_folder=f"{self.location}/output/dat_files/",
+            new_file_name_template=f"{self.iter}.dat" 
+        )
+
+ 
+
+
         # also collect al the operational files 
         self.create_directory_if_not_exists(f"output/{self.iter}/operations_Files" )
         self.move_simulation_output(f"{self.location}/operations_Files", f"{self.location}/output/{self.iter}/operations_Files")
@@ -130,7 +158,57 @@ class Simmulation():
 
 
         self.logger.info("Simulation workflow completed successfully. :<)")
+        return salome_runtime,  run_time, num_tet
 
+    """def get_tet4_count(self, location, project_name):
+        # Construct the command
+        command = f"grep Tet4 {location}/operations_Files/{project_name}.fly"
+        try:
+            # Run the command and capture the output
+            result = subprocess.check_output(command, shell=True, text=True)
+            # Extract the count (assuming the output is "Tet4 37700")
+            count = result.split()[1]  # The second part should be the number
+            logging.info(f"Number of Tet4 elements: {count}")
+            return int(count)
+        except subprocess.CalledProcessError as e:
+            logging.error("Failed to retrieve Tet4 count")
+            return None"""
+        
+        #f"{self.location}/output/{self.iter}/salome""""
+
+    
+    def get_tet4_count(self, location, salome_SlurmID):
+        """
+        Retrieves the Tet4 count from a specified text file.
+
+        Args:
+            location (str): Base location of the project files.
+            iter_num (str or int): Iteration number or identifier for the output folder.
+
+        Returns:
+            int: The count of Tet4 elements, or None if retrieval fails.
+        """
+        # Construct the path to the txt file
+        file_path = f"{location}/output/{self.iter}/salome/slurm-{salome_SlurmID}/tets_output.txt"
+        self.check_folder_exists(f"output/{self.iter}/salome/slurm-{salome_SlurmID}" )
+        self.check_files_in_folder(f"output/{self.iter}/salome/slurm-{salome_SlurmID}", ["tets_output.txt"])
+        self.make_all_files_in_dir_executable(f"output/{self.iter}/salome/slurm-{salome_SlurmID}" )
+        try:
+            # Open the txt file and read its content
+            with open(file_path, "r") as file:
+                content = file.read()
+            
+            # Extract the count (assuming the format "Tets Size: 37700")
+            count = content.split(":")[1].strip()  # Gets the number after "Tets Size: "
+            
+            # Log and return the count as an integer
+            logging.info(f"Number of Tet4 elements in sensor: {count}")
+            return int(count)
+        except (FileNotFoundError, IndexError, ValueError) as e:
+            logging.error(e)
+            logging.error("Failed to retrieve Tet4 count from the text file")
+            return None
+    
 
     def get_microMag_SlurmID(self):
         return self.microMag_SlurmID
@@ -203,11 +281,12 @@ class Simmulation():
             None
         """
         folder_path = os.path.join(self.location, folder_name)
+        logging.debug(f"Making all files in '{folder_path}' executable and readable...")
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
                 os.chmod(file_path, 0o755)  # Set executable permission
-                #self.logger.debug(f"Made file executable and readable: {file_path}")
+                self.logger.debug(f"Made file executable and readable: {file_path}")
 
     def check_files_in_folder(self, folder_name, file_names):
         """
@@ -277,7 +356,7 @@ class Simmulation():
         self.shape.apply_all_modifications(self.location)
 
 
-    def run_salome_mesh_generation(self, project_name, repeat=3): 
+    def run_salome_mesh_generation(self, project_name, repeat=1): 
         """
         Generates mesh using Salome.
 
@@ -313,7 +392,7 @@ class Simmulation():
 
 
         self.logger.debug("Initiating mesh generation with Salome...")
-
+        run_time = 0
         # Attempt mesh generation up to 'repeat' times
         for attempt in range(1, repeat + 1):
             try:
@@ -323,7 +402,7 @@ class Simmulation():
                 # Check if the expected output file exists
                 if self.check_files_in_folder("operations_Files", ["mesh.unv"]):
                     self.logger.debug(f"Mesh generation successful after {attempt} attempt(s).")
-                    return salome_job_id
+                    return salome_job_id, run_time 
                 else:
                     self.logger.warning(f"Mesh generation attempt {attempt} failed. File 'mesh.unv' not found.")
             
@@ -333,6 +412,7 @@ class Simmulation():
         # If we reach here, all attempts have failed
         self.logger.error(f"Mesh generation failed after {repeat} attempts.")
         sys.exit(1)
+        
 
 
 
@@ -420,6 +500,59 @@ class Simmulation():
             self.logger.error(f"Folder {folder_to_move} does not exist. Skipping move operation.")
             sys.exit(1)
 
+    def move_and_rename_file(self, file_to_move, target_folder, new_file_name):
+        """
+        Moves a single file to the specified target folder and renames it.
+
+        Args:
+            file_to_move (str): The path of the file to be moved.
+            target_folder (str): The path of the target folder where the file will be moved to.
+            new_file_name (str): The new name for the file in the target folder.
+
+        Raises:
+            FileNotFoundError: If the file to be moved does not exist.
+
+        Returns:
+            None
+        """
+        # Check if the file exists
+        if os.path.isfile(file_to_move):
+            # Define the full path for the renamed file in the target folder
+            target_path = os.path.join(target_folder, new_file_name)
+            
+            # copy and rename the file
+            shutil.copy(file_to_move, target_path)
+            self.logger.debug(f"Moved and renamed file '{file_to_move}' to '{target_path}'.")
+        else:
+            # Log an error and exit if the file does not exist
+            self.logger.error(f"File '{file_to_move}' does not exist. Skipping move and rename operation.")
+            sys.exit(1)
+
+    def move_and_rename_files_by_pattern(self, folder_to_search, pattern, target_folder, new_file_name_template):
+        """
+        Finds files matching a pattern in a specified folder, moves each file to the target folder, 
+        and renames them according to a provided template.
+
+        Args:
+            folder_to_search (str): The folder in which to search for files.
+            pattern (str): The filename pattern to search for (e.g., "*.dat").
+            target_folder (str): The path of the target folder where files will be moved.
+            new_file_name_template (str): Template for renaming files, with `{index}` for unique naming.
+
+        Returns:
+            None
+        """
+        # Search for files matching the pattern
+        files = glob.glob(os.path.join(folder_to_search, pattern))
+
+        if not files:
+            self.logger.error(f"No files matching '{pattern}' found in '{folder_to_search}'.")
+            return
+
+        # Move and rename each file
+        for index, file_path in enumerate(files, start=1):
+            new_file_name = new_file_name_template.format(index=index)
+            self.move_and_rename_file(file_path, target_folder, new_file_name)
 
 
 

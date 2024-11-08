@@ -37,8 +37,8 @@ class Shape:
         self.slurm_salome_path = os.path.join(config.generalSettings.location,"prerequisits/salome.slurm")
 
         #[initial state]
-        self.mx = 1.
-        self.my = 0.
+        self.mx = 0.
+        self.my = 1.
         self.mz = 0.
         #[field]
         self.hstart = config.simulation.hstart          
