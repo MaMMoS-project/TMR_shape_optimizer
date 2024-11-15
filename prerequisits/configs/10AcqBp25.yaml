@@ -14,8 +14,8 @@ shape:
   
 
 simulation:
-  sim_name: '8be120102001002'
-  iter: 2000000
+  sim_name: 'ParaOpt2'
+  iter: 1000
   main_Mesh_min: 1e-4
   main_mesh_max: 1.0
   object_Mesh_max: 5e-3  # 5e-9
@@ -30,9 +30,9 @@ simulation:
   hstep: -0.0001
 
 optimizer:
-  acq_kind: 'ucb'           # 'ei', 'ucb', 'poi' supported
-  kappa: 2.5                # 2.576
-  xi: 0.0                   # 0.0
+  acq_kind: 'poi'           # 'ei', 'ucb', 'poi' supported
+  kappa: 0.0                # 2.576
+  xi: 25.0                   # 0.0
   kappa_decay: 1.0          # 1.0
   kappa_decay_delay: 0      # 0
 

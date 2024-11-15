@@ -7,8 +7,6 @@ from pathlib import Path
 # scp -r /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/* fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/.
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 #watch -n 1 'squeue -u fillies'
-#tail -f logs/output.log
-
 
 
 # In your main or any other module
@@ -17,7 +15,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="2su6100515001002.yaml")
+    config = load_config(location=location, config_name="10AcqBp25.yaml")
 
 
     # set location of simulation to the location of the main.py file
