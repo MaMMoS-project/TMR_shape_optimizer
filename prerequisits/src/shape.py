@@ -26,6 +26,8 @@ class Shape:
         self.main_Mesh_min = config.simulation.main_Mesh_min
         self.main_mesh_max = config.simulation.main_mesh_max
         self.object_Mesh_max = config.simulation.object_Mesh_max
+        self.x_direction_max_mesh = config.simulation.x_direction_max_mesh
+        self.y_direction_max_mesh = config.simulation.y_direction_max_mesh
 
         self.testGeomatrySettings()
         logging.info(f"Mesh setting: main_Mesh_min={self.main_Mesh_min}, main_mesh_max={self.main_mesh_max}, object_Mesh_max={self.object_Mesh_max}")
@@ -115,14 +117,14 @@ class Shape:
             logging.error("Small box needs to be smaller than big box")
             sys.exit()
         
-        # test if small box smaller as bigBox:
+        """# test if small box smaller as bigBox:
         if self.main_Mesh_min >= self.main_mesh_max:
             logging.error("main_Mesh_min needs to be smaller than main_mesh_max")
             sys.exit()
         # test if small box smaller as bigBox:
         if self.main_mesh_max <= self.object_Mesh_max:
             logging.error("main_mesh_max needs to be bigger than object_Mesh_max")
-            sys.exit()
+            sys.exit()"""
         # check if every value is biggen than 0
         variables = [self.smallBox_factor, 
                      self.bigBox_factor, self.main_Mesh_min, 
@@ -407,7 +409,11 @@ class Ellipse(Shape):
             'bigBox_factor = 11': f'bigBox_factor = {self.bigBox_factor}',
             'main_Meash_min = 0.00001': f'main_Meash_min = {self.main_Mesh_min}',
             'main_mesh_max = 1': f'main_mesh_max = {self.main_mesh_max}',
-            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}'
+            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}',
+            'x_direction_max_mesh = 0.002': f'x_direction_max_mesh = {self.x_direction_max_mesh}',
+            'y_direction_max_mesh = 0.002': f'y_direction_max_mesh = {self.y_direction_max_mesh}',
+            'x_direction_max_mesh = 0.002': f'x_direction_max_mesh = {self.x_direction_max_mesh}',
+            'y_direction_max_mesh = 0.002': f'y_direction_max_mesh = {self.y_direction_max_mesh}'
         }
         
         for key, value in modifications.items():
@@ -549,7 +555,9 @@ class Box(Shape):
             'bigBox_factor = 11': f'bigBox_factor = {self.bigBox_factor}',
             'main_Meash_min = 0.00001': f'main_Meash_min = {self.main_Mesh_min}',
             'main_mesh_max = 1': f'main_mesh_max = {self.main_mesh_max}',
-            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}'
+            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}',
+            'x_direction_max_mesh = 0.002': f'x_direction_max_mesh = {self.x_direction_max_mesh}',
+            'y_direction_max_mesh = 0.002': f'y_direction_max_mesh = {self.y_direction_max_mesh}'
         }
         
         for key, value in modifications.items():
@@ -686,7 +694,9 @@ class Stick(Shape):
             'bigBox_factor = 11': f'bigBox_factor = {self.bigBox_factor}',
             'main_Meash_min = 0.00001': f'main_Meash_min = {self.main_Mesh_min}',
             'main_mesh_max = 1': f'main_mesh_max = {self.main_mesh_max}',
-            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}'
+            'object_Mesh_max = 0.005': f'object_Mesh_max = {self.object_Mesh_max}',
+            'x_direction_max_mesh = 0.002': f'x_direction_max_mesh = {self.x_direction_max_mesh}',
+            'y_direction_max_mesh = 0.002': f'y_direction_max_mesh = {self.y_direction_max_mesh}'
         }
         
         for key, value in modifications.items():

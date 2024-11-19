@@ -17,7 +17,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="mesh_ana.yaml")
+    config = load_config(location=location, config_name="FM.yaml")
 
         # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
@@ -55,7 +55,7 @@ def mesh_ana() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="12MSteps.yaml")
+    config = load_config(location=location, config_name="1FMsmall.yaml")
 
         # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
@@ -68,18 +68,21 @@ def mesh_ana() -> None:
     logging.info("Mesh analysis started")
 
     #object_Mesh_max: 5e-3  
-    min_mesh = 1e-3
-    max_mesh = 3e-2
-    steps = 10
+    min_mesh = 1e-0
+    max_mesh = 5e-2
+    steps = 100
     all_mesh = np.logspace(np.log10(min_mesh), np.log10(max_mesh), num=steps)
-    all_mesh = all_mesh[::-1]
     logging.info(f" Analyzing mesh sizes from {min_mesh} to {max_mesh} with {steps} steps")
 
 
     for mesh in all_mesh:
         try:
-            logging.info(f"Mesh analysis with mesh size: {mesh  }")
-            config.simulation.object_Mesh_max = mesh
+            logging.info(f"Mesh analysis with mesh factor size: {mesh  }")
+            config.simulation.object_Mesh_max = config.shape.init_xlen * mesh  # Set the mesh size proportional to the object size
+            config.simulation.x_direction_max_mesh = config.shape.init_ylen * mesh
+            config.simulation.y_direction_max_mesh = config.shape.init_zlen * mesh
+
+            logging.debug(f"Mesh size set to: {config.simulation.object_Mesh_max, config.simulation.x_direction_max_mesh, config.simulation.y_direction_max_mesh}")
 
             optimizer = Optimizer(locattion=config.generalSettings.location , config=config,
                           max_Iter=config.simulation.iter)
@@ -133,3 +136,4 @@ if __name__ == "__main__":
     #main()
     #single_postprocess()
     mesh_ana()
+    

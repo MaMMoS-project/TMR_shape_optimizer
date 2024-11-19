@@ -41,9 +41,10 @@ bigBox_factor = 11   #>smallBox_factor
 
 main_Meash_min = 0.00001
 main_mesh_max = 1
-
 object_Mesh_max = 0.005
 
+x_direction_max_mesh = 0.002
+y_direction_max_mesh = 0.002
 
 #----------------------------------------------------
 
@@ -97,6 +98,14 @@ geompy.addToStudy( Glue_1, 'Glue_1' )
 geompy.addToStudyInFather( Glue_1, a1, '1' )
 geompy.addToStudyInFather( Glue_1, a2, '2' )
 geompy.addToStudyInFather( Glue_1, a3, '3' )
+
+[Face_1,Face_2,Face_3,Face_4,Face_5,Face_6] = geompy.ExtractShapes(targetBox, geompy.ShapeType["FACE"], True)
+geompy.addToStudyInFather( targetBox, Face_1, 'Face_1' )
+geompy.addToStudyInFather( targetBox, Face_2, 'Face_2' )
+geompy.addToStudyInFather( targetBox, Face_3, 'Face_3' )
+geompy.addToStudyInFather( targetBox, Face_4, 'Face_4' )
+geompy.addToStudyInFather( targetBox, Face_5, 'Face_5' )
+geompy.addToStudyInFather( targetBox, Face_6, 'Face_6' )
 """
 ###
 ### SMESH component
@@ -109,48 +118,43 @@ smesh = smeshBuilder.New()
 #smesh.SetEnablePublish( False ) # Set to False to avoid publish in study if not needed or in some particular situations:
                                  # multiples meshes built in parallel, complex and numerous mesh edition (performance)
 
-Mesh_2 = smesh.Mesh(Glue_1,'Mesh_2')
-NETGEN_1D_2D_3D = Mesh_2.Tetrahedron(algo=smeshBuilder.NETGEN_1D2D3D)
-NETGEN_3D_Parameters_1 = NETGEN_1D_2D_3D.Parameters()
-NETGEN_3D_Parameters_1.SetMaxSize( main_mesh_max )
-NETGEN_3D_Parameters_1.SetMinSize( main_Meash_min )
-NETGEN_3D_Parameters_1.SetSecondOrder( 0 )
-NETGEN_3D_Parameters_1.SetOptimize( 1 )
-NETGEN_3D_Parameters_1.SetFineness( 2 )
-NETGEN_3D_Parameters_1.SetChordalError( -1 )
-NETGEN_3D_Parameters_1.SetChordalErrorEnabled( 0 )
-NETGEN_3D_Parameters_1.SetUseSurfaceCurvature( 1 )
-NETGEN_3D_Parameters_1.SetFuseEdges( 1 )
-NETGEN_3D_Parameters_1.SetQuadAllowed( 0 )
-a1_1 = Mesh_2.GroupOnGeom(a1,'1',SMESH.VOLUME)
-a2_1 = Mesh_2.GroupOnGeom(a2,'2',SMESH.VOLUME)
-a3_1 = Mesh_2.GroupOnGeom(a3,'3',SMESH.VOLUME)
-a1_2 = Mesh_2.GroupOnGeom(a1,'1',SMESH.VOLUME)
-a2_2 = Mesh_2.GroupOnGeom(a2,'2',SMESH.VOLUME)
-a3_2 = Mesh_2.GroupOnGeom(a3,'3',SMESH.VOLUME)
-isDone = Mesh_2.Compute()
-[ a1_1, a2_1, a3_1, a1_2, a2_2, a3_2 ] = Mesh_2.GetGroups()
-NETGEN_3D_Parameters_1.SetLocalSizeOnShape(targetBox, object_Mesh_max)
-NETGEN_3D_Parameters_1.SetCheckChartBoundary( 48 )
-isDone = Mesh_2.Compute()
-[ a1_1, a2_1, a3_1, a1_2, a2_2, a3_2 ] = Mesh_2.GetGroups()
+Mesh_1 = smesh.Mesh(Glue_1,'Mesh_1')
+NETGEN_1D_2D_3D = Mesh_1.Tetrahedron(algo=smeshBuilder.NETGEN_1D2D3D)
+NETGEN_3D_Parameters = NETGEN_1D_2D_3D.Parameters()
+NETGEN_3D_Parameters.SetMaxSize( main_mesh_max )
+NETGEN_3D_Parameters.SetMinSize( main_Meash_min )
+NETGEN_3D_Parameters.SetSecondOrder( 0 )
+NETGEN_3D_Parameters.SetOptimize( 1 )
+NETGEN_3D_Parameters.SetFineness( 2 )
+NETGEN_3D_Parameters.SetChordalError( -1 )
+NETGEN_3D_Parameters.SetChordalErrorEnabled( 0 )
+NETGEN_3D_Parameters.SetUseSurfaceCurvature( 1 )
+NETGEN_3D_Parameters.SetFuseEdges( 1 )
+NETGEN_3D_Parameters.SetQuadAllowed( 0 )
+NETGEN_3D_Parameters.SetLocalSizeOnShape(targetBox, object_Mesh_max)
+NETGEN_3D_Parameters.SetLocalSizeOnShape(Face_1, x_direction_max_mesh)
+NETGEN_3D_Parameters.SetLocalSizeOnShape(Face_2, y_direction_max_mesh)
+NETGEN_3D_Parameters.SetLocalSizeOnShape(Face_5, y_direction_max_mesh)
+NETGEN_3D_Parameters.SetLocalSizeOnShape(Face_6, x_direction_max_mesh)
+NETGEN_3D_Parameters.SetCheckChartBoundary( 4 )
+a1 = Mesh_1.GroupOnGeom(a1,'1',SMESH.VOLUME)
+a2 = Mesh_1.GroupOnGeom(a2,'2',SMESH.VOLUME)
+a3 = Mesh_1.GroupOnGeom(a3,'3',SMESH.VOLUME)
+isDone = Mesh_1.Compute()
+#Mesh_1.CheckCompute()
+[ a1, a2, a3 ] = Mesh_1.GetGroups()
 
-tets = a1_1.Size()  #Finde tets
 try:
+  tets = a1.Size()  #Finde tets
+
   # Specify the file path and name
   output_file_path = "tets_output.txt"
 
   # Open the file in write mode and save the tets value
   with open(output_file_path, "w") as file:
     file.write(f"Tets Size: {tets}\n")
-except:
-  print('ExportUNV() failed. Invalid file name?')
 
-  
-try:
-
-  
-  Mesh_2.ExportUNV( r'/ceph/home/fillies/tmr_sensor_sensors/automatization/operations_Files/mesh.unv', 0 )
+  Mesh_1.ExportUNV( r'/ceph/home/fillies/tmr_sensor_sensors/automatization/operations_Files/mesh.unv', 0 )
   pass
 except:
   print('ExportUNV() failed. Invalid file name?')
@@ -158,15 +162,11 @@ except:
 
 ## Set names of Mesh objects
 smesh.SetName(NETGEN_1D_2D_3D.GetAlgorithm(), 'NETGEN 1D-2D-3D')
-smesh.SetName(NETGEN_3D_Parameters_1, 'NETGEN 3D Parameters_1')
-smesh.SetName(Mesh_2.GetMesh(), 'Mesh_2')
-smesh.SetName(a3_2, '3')
-smesh.SetName(a2_2, '2')
-smesh.SetName(a1_2, '1')
-smesh.SetName(a3_1, '3')
-smesh.SetName(a2_1, '2')
-smesh.SetName(a1_1, '1')
-
+smesh.SetName(NETGEN_3D_Parameters, 'NETGEN 3D Parameters')
+smesh.SetName(Mesh_1.GetMesh(), 'Mesh_1')
+smesh.SetName(a3, '3')
+smesh.SetName(a2, '2')
+smesh.SetName(a1, '1')
 
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser()

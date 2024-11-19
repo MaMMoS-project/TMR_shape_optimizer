@@ -34,6 +34,8 @@ class SimulationConfig(BaseModel):
     main_Mesh_min: float
     main_mesh_max: float
     object_Mesh_max: float
+    x_direction_max_mesh: float
+    y_direction_max_mesh: float
     xlen_start: float
     xlen_stop: float
     ylen_start: float
