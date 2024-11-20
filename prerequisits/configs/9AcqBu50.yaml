@@ -14,7 +14,7 @@ shape:
   
 
 simulation:
-  sim_name: 'paraOpt1'
+  sim_name: '9AcqBu50'
   iter: 1000
   main_Mesh_min: 1e-4
   main_mesh_max: 1.0
