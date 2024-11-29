@@ -55,7 +55,7 @@ def mesh_ana() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="1FMsmall.yaml")
+    config = load_config(location=location, config_name="3FMsmall.yaml")
 
         # set location of simulation to the location of the main.py file
     config.generalSettings.location = location
@@ -69,8 +69,8 @@ def mesh_ana() -> None:
 
     #object_Mesh_max: 5e-3  
     min_mesh = 1e-0
-    max_mesh = 5e-2
-    steps = 100
+    max_mesh = 9e-2
+    steps = 50
     all_mesh = np.logspace(np.log10(min_mesh), np.log10(max_mesh), num=steps)
     logging.info(f" Analyzing mesh sizes from {min_mesh} to {max_mesh} with {steps} steps")
 
@@ -78,11 +78,11 @@ def mesh_ana() -> None:
     for mesh in all_mesh:
         try:
             logging.info(f"Mesh analysis with mesh factor size: {mesh  }")
-            config.simulation.object_Mesh_max = config.shape.init_xlen * mesh  # Set the mesh size proportional to the object size
-            config.simulation.x_direction_max_mesh = config.shape.init_ylen * mesh
-            config.simulation.y_direction_max_mesh = config.shape.init_zlen * mesh
+            #config.simulation.object_Mesh_max = config.shape.init_xlen  # Set the mesh size proportional to the object size
+            config.simulation.x_direction_max_mesh = config.simulation.x_direction_max_mesh * mesh
+            config.simulation.y_direction_max_mesh = config.simulation.y_direction_max_mesh * mesh
 
-            logging.debug(f"Mesh size set to: {config.simulation.object_Mesh_max, config.simulation.x_direction_max_mesh, config.simulation.y_direction_max_mesh}")
+            logging.info(f"Mesh size set to: {config.simulation.object_Mesh_max, config.simulation.x_direction_max_mesh, config.simulation.y_direction_max_mesh}")
 
             optimizer = Optimizer(locattion=config.generalSettings.location , config=config,
                           max_Iter=config.simulation.iter)

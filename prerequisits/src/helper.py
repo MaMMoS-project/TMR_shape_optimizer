@@ -75,7 +75,7 @@ def append_line_to_file(file_path, param, label, config, slome_runtime, micro_ma
             if file.tell() == 0:
                 header = "object_Mesh_max | salome_runtime | micro_mag_runtime | num_tet label\n"
                 file.write(header)
-            line = f"{config.simulation.object_Mesh_max} {slome_runtime/60} {micro_mag_runtime/60} {num_tet} {label}\n"
+            line = f"{config.simulation.x_direction_max_mesh} {slome_runtime/60} {micro_mag_runtime/60} {num_tet} {label}\n"
             file.write(line)
     except FileNotFoundError:
         print("File not found.")
