@@ -20,9 +20,9 @@ class BoxConfig(BaseModel):
 
 class EllipseConfig(BaseModel):
     name: str = "Ellipse"
-    init_r1: float
-    init_r2: float
-    init_h: float
+    init_xlen: float
+    init_xlen: float
+    init_xlen: float
 
 # Define the ShapeConfig as a Union of Box and Ellipse configurations
 ShapeConfig = Union[BoxConfig, EllipseConfig]

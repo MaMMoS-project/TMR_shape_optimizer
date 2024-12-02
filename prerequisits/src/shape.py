@@ -205,7 +205,7 @@ class Shape:
             'MODELNAME="<model>"': f'MODELNAME="{self.projectName}"',
             '<description>': str(self.projectName),
             '--mem-per-cpu=8': f'--mem-per-cpu={self.mem_GB}',
-            '--cpus-per-task=1': f'--cpus-per-task={self.number_cores}',
+            #'--cpus-per-task=1': f'--cpus-per-task={self.number_cores}',
             '--constraint=nv12': f'--constraint={self.gpu}'
         }
         
@@ -339,36 +339,34 @@ class Ellipse(Shape):
         super().__init__(config)
         
         self.modifyer_path = os.path.join(config.generalSettings.location, "prerequisits/src/ellipse_creator.py")
-        self.param_names = ["r1", "r2", "h"]
+        self.param_names = ["xlen", "ylen", "zlen"]
         #target box size (this is the magnet)
-        self.r1 = config.shape.init_r1
-        self.r2 = config.shape.init_r2  
-        self.h = config.shape.init_h
+        self.xlen = config.shape.init_xlen
+        self.ylen = config.shape.init_ylen
+        self.zlen = config.shape.init_zlen
 
         self.testSpecificSape()
-        logging.info(f"Ellipse Shape initialized with shape [{self.r1}, {self.r2}, {self.h}], and shallow input Tests")
+        logging.info(f"Ellipse Shape initialized with shape [{self.xlen}, {self.ylen}, {self.zlen}], and shallow input Tests")
 
 
     def update_shape(self, param):
-        'enables the updated shape to be set'
         if len(param) != 3:
-            logging.error("Ellipse needs to have 3 values (r1,r2,h)")
+            logging.error("Ellipse needs to have 3 values (x,y,z)")
             sys.exit()
-
-        self.r1 = param['r1']
-        self.r2 = param['r2']
-        self.h = param['h']
+        self.xlen = param['xlen']
+        self.ylen = param['ylen']
+        self.zlen = param['zlen']
 
 
     def testSpecificSape(self):
-        if self.r1 < 0:
-            logging.error("r1 needs to be bigger than 0")
+        if self.xlen < 0:
+            logging.error("xlen needs to be bigger than 0")
             sys.exit()
-        if self.r2 < 0:
-            logging.error("r2 needs to be bigger than 0")
+        if self.ylen < 0:
+            logging.error("ylen needs to be bigger than 0")
             sys.exit()
-        if self.h < 0:
-            logging.error("h needs to be bigger than 0")
+        if self.zlen < 0:
+            logging.error("ylen needs to be bigger than 0")
             sys.exit()
 
 
@@ -400,9 +398,9 @@ class Ellipse(Shape):
         # Modify the script content
         modifications = {
             '/ceph/home/fillies/tmr_sensor_sensors/automatization': str(location),
-            'xlen = 1': f'xlen = {self.r1}',
-            'ylen = 0.1': f'ylen = {self.r2}',
-            'zlen = 0.01': f'zlen = {self.h}',
+            'xlen = 1': f'xlen = {self.xlen}',
+            'ylen = 0.1': f'ylen = {self.ylen}',
+            'zlen = 0.01': f'zlen = {self.zlen}',
             'smallBox_factor = 3': f'smallBox_factor = {self.smallBox_factor}',
             'bigBox_factor = 11': f'bigBox_factor = {self.bigBox_factor}',
             'main_Meash_min = 0.00001': f'main_Meash_min = {self.main_Mesh_min}',
@@ -428,13 +426,14 @@ class Ellipse(Shape):
     
         
     def disturbe_shape(self, percent=5):
-        self.r1 = self.r1 + self.r1 * np.random.uniform(-percent/100, percent/100)
-        self.r2 = self.r2 + self.r2 * np.random.uniform(-percent/100, percent/100)
-        self.h = self.h + self.h * np.random.uniform(-percent/100, percent/100)
+        #randmly add or subracts up to 5 % of value
+        self.xlen = self.xlen + self.xlen * np.random.uniform(-percent/100, percent/100)
+        self.ylen = self.ylen + self.ylen * np.random.uniform(-percent/100, percent/100)
+        self.zlen = self.zlen + self.zlen * np.random.uniform(-percent/100, percent/100)
 
     def print_shape_info(self):
         print(f"Project Name: {self.projectName}")
-        print(f"Ellipse Dimensions: r1={self.r1}, r2={self.r2}, h={self.h}")
+        print(f"Ellipse Dimensions: xlen={self.xlen}, ylen={self.ylen}, zlen={self.zlen}")
         print(f"Small Box Factor: {self.smallBox_factor}, Big Box Factor: {self.bigBox_factor}")
         print(f"Mesh Settings: main_Meash_min={self.main_Mesh_min}, main_mesh_max={self.main_mesh_max}, object_Mesh_max={self.object_Mesh_max}")
         print(f"Simulation Settings: mx={self.mx}, my={self.my}, mz={self.mz}, hstart={self.hstart}, hfinal={self.hfinal}, hstep={self.hstep}, mfinal={self.mfinal}, mstep={self.mstep}")
@@ -444,7 +443,7 @@ class Ellipse(Shape):
 
     def print_shape_info_short(self):
         print(f"Project Name: {self.projectName}")
-        print(f"Ellipse Dimensions: r1={self.r1}, r2={self.r2}, h={self.h}")
+        print(f"Ellipse Dimensions: xlen={self.xlen}, ylen={self.ylen}, zlen={self.zlen}")
         print(f"Small Box Factor: {self.smallBox_factor}, Big Box Factor: {self.bigBox_factor}")
         print(f"Mesh Settings: main_Meash_min={self.main_Mesh_min}, main_mesh_max={self.main_mesh_max}, object_Mesh_max={self.object_Mesh_max}")
         print(f"Simulation Settings: mx={self.mx}, my={self.my}, mz={self.mz}, hstart={self.hstart}, hfinal={self.hfinal}, hstep={self.hstep}, mfinal={self.mfinal}, mstep={self.mstep}")
@@ -453,14 +452,14 @@ class Ellipse(Shape):
 
 
     def get_info_shape(self):
-        return [self.r1, self.r2, self.h]
+        return [self.xlen, self.ylen, self.zlen]
     
 
     def save_box_info_to_file(self, current_dir):
         file_path = os.path.join(current_dir, "operations_Files/" + str(self.projectName) + ".txt")
         with open(file_path, 'w') as file:
             file.write(f"Project Name: {self.projectName}\n")
-            file.write(f"Ellipse Dimensions: r1={self.r1}, r2={self.r2}, h={self.h}\n")
+            file.write(f"Ellipse Dimensions: xlen={self.xlen}, ylen={self.ylen}, zlen={self.zlen}\n")
             file.write(f"Small Box Factor: {self.smallBox_factor}, Big Box Factor: {self.bigBox_factor}\n")
             file.write(f"Mesh Settings: main_Meash_min={self.main_Mesh_min}, main_mesh_max={self.main_mesh_max}, object_Mesh_max={self.object_Mesh_max}\n")
             file.write(f"Simulation Settings: mx={self.mx}, my={self.my}, mz={self.mz}, hstart={self.hstart}, hfinal={self.hfinal}, hstep={self.hstep}, mfinal={self.mfinal}, mstep={self.mstep}\n")
