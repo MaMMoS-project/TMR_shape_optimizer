@@ -204,7 +204,7 @@ class Shape:
         modifications = {
             'MODELNAME="<model>"': f'MODELNAME="{self.projectName}"',
             '<description>': str(self.projectName),
-            '--mem-per-cpu=8': f'--mem-per-cpu={self.mem_GB}',
+            '--mem-per-gpu=15': f'--mem-per-cpu={self.mem_GB}',
             #'--cpus-per-task=1': f'--cpus-per-task={self.number_cores}',
             '--constraint=nv12': f'--constraint={self.gpu}'
         }
@@ -306,9 +306,9 @@ class Shape:
 
         # Modify the script content
         modifications = {
-            '--job-name="salome_equi_n128_dirac75_2nm"': f'--job-name="{self.projectName}"',
-            '--mem=8': f'--mem={self.mem_GB}',
-            '--cpus-per-task=4': f'--cpus-per-task={self.number_cores}',
+            '--job-name="<description>"': f'--job-name="{self.projectName}"',
+            '--mem-per-cpu=25': f'--mem-per-cpu={self.mem_GB}',
+            '--cpus-per-task=2': f'--cpus-per-task={self.number_cores}',
             '"$SLURM_SUBMIT_DIR"/step2_salome_macroFullLM_2nm.py': '"$SLURM_SUBMIT_DIR"/salome_mesh.py',
             'step2_salome_macroFullLM_2nm.py': 'salome_mesh.py'
         }

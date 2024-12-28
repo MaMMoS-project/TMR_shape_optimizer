@@ -14,7 +14,7 @@ shape:
   
 
 simulation:
-  sim_name: '1su120102001002'
+  sim_name: '21AcqSu01'
   iter: 2000
   main_Mesh_min: 1e-4
   main_mesh_max: 1.0
@@ -31,7 +31,7 @@ simulation:
 
 optimizer:
   acq_kind: 'ucb'           # 'ei', 'ucb', 'poi' supported
-  kappa: 2.5                # 2.576
+  kappa: 0.1                # 2.576
   xi: 0.0                   # 0.0
   kappa_decay: 1.0          # 1.0
   kappa_decay_delay: 0      # 0
@@ -39,7 +39,7 @@ optimizer:
 server:
   number_cores: 2
   mem_GB: 30
-  gpu: 'nv16'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
+  gpu: 'nv12'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
 
 generalSettings:
   log_level: 2

@@ -20,7 +20,7 @@ import GEOM
 from salome.geom import geomBuilder
 import math
 import SALOMEDS
-
+import killSalome
 
 geompy = geomBuilder.New()
 
@@ -158,5 +158,5 @@ smesh.SetName(a1_1, '1')
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser()
 
-  
+killSalome.killAllPorts() 
  

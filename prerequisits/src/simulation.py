@@ -277,7 +277,7 @@ class Simmulation():
         self.shape.apply_all_modifications(self.location)
 
 
-    def run_salome_mesh_generation(self, project_name, repeat=3): 
+    def run_salome_mesh_generation(self, project_name, repeat=1): 
         """
         Generates mesh using Salome.
 
