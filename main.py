@@ -15,7 +15,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="port_test.yaml")
+    config = load_config(location=location, config_name="gE900.yaml")
 
 
     # set location of simulation to the location of the main.py file

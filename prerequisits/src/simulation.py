@@ -15,7 +15,7 @@ from prerequisits.src.shape import *
 
 
 class Simmulation():
-    def __init__(self, shape,  location, iter=1):
+    def __init__(self, shape,  location, iter=3):
         """
         This function orchestrates the entire simulation workflow for a given geometric shape.
         It encompasses several steps including preprocessing, mesh generation, transformation of mesh format,
@@ -277,7 +277,7 @@ class Simmulation():
         self.shape.apply_all_modifications(self.location)
 
 
-    def run_salome_mesh_generation(self, project_name, repeat=1): 
+    def run_salome_mesh_generation(self, project_name, repeat=3): 
         """
         Generates mesh using Salome.
 
