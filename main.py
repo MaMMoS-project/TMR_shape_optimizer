@@ -56,7 +56,8 @@ def single_postprocess():
     margin_to_line=0.05
     #print(threshhold_training, margin_to_line)
     temp_post = PostProc(threshhold_training, margin_to_line )
-    temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/2D_test.dat')
+    #temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/2D_test.dat')
+    temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/temp/eg_hys2.dat')
     temp_post.linear_regression(regression_restart_counter = 0)
     temp_post.anasyse_data()
     temp_post.plot_data()
@@ -70,5 +71,5 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    main()
-    #single_postprocess()
+    #main()
+    single_postprocess()
