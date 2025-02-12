@@ -88,12 +88,14 @@ The project consists of several key components organized as follows:
     (...)
     config = load_config(location=location, config_name="readme_eg.yaml")
     (...)
+  ```
 
 3. Copy your project to an remote server.
 
 4. Run `main.py` as follows:
    ```sh
    nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
+   ```
 
 
 
