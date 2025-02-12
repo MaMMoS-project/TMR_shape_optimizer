@@ -81,6 +81,7 @@ The project consists of several key components organized as follows:
     simulation:
     sim_name: 'readme_eg'
     (...)
+  ```
 
 2. Configure the config file path in `main.py`.
   ```py
