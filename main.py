@@ -15,7 +15,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="gE900.yaml")
+    config = load_config(location=location, config_name="santa_tmp.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -71,5 +71,5 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    #main()
-    single_postprocess()
+    main()
+    #single_postprocess()

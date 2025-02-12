@@ -75,9 +75,21 @@ The project consists of several key components organized as follows:
 
 ### Running a Simulation
 
-1. Create a configuration file in `prerequisites` according to your requirements.
+1. Create a configuration file in `prerequisites` according to your requirements. And name is according to your simname **`readme_eg.yaml`**.
+```sh
+  (...)
+   simulation:
+   sim_name: 'readme_eg'
+  (...)
 2. Configure the config file path in `main.py`.
-3. Run `main.py` as follows:
+```sh
+    (...)
+    config = load_config(location=location, config_name="readme_eg.yaml")
+    (...)
+
+3. Copy your project to an remote server.
+
+4. Run `main.py` as follows:
    ```sh
    nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 
