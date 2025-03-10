@@ -5,8 +5,6 @@ import numpy as np
 from scipy.optimize import minimize
 import pandas as pd 
 import logging
-import matplotlib
-import logging
 from sklearn.metrics import r2_score
 
 from prerequisits.src.results import *

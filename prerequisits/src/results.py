@@ -24,7 +24,6 @@ class Results:
         self.x_max_lin = None
     
 
-
     def set_x_max_lin(self, x_max_lin):
         self.x_max_lin = x_max_lin
 
