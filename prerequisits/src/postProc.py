@@ -7,7 +7,7 @@ import pandas as pd
 import logging
 from sklearn.metrics import r2_score
 
-from prerequisits.src.results import *
+#from prerequisits.src.results import *
 
 
 # -----------do not modify below this line----------------
@@ -38,7 +38,7 @@ class PostProc:
         self.df_training = None
 
         #results of the post processing
-        self.results = Results()
+        #self.results = Results()
 
         #logger
         self.logger = logging.getLogger(__name__)

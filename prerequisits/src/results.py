@@ -2,7 +2,7 @@
 # for completness this class would be nice to contain box informations
 # or even better enhenrices box 
 
-class Results:
+"""class Results:
     def __init__(self):
 
         # also the results of the lin regression performed on the middle part of the hysteresis loop 
@@ -48,10 +48,9 @@ class Results:
     def get_b(self):
         return self.b
  
-
-
     def set_res_of_optimization(self, res):
         self.lin_Regression_res = res
 
     def get_res_of_optimization(self):
         return self.lin_Regression_res
+"""

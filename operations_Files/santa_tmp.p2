@@ -1,0 +1,34 @@
+[mesh]
+size = 1.e-6    ; scaling factor for mesh/geometry
+scale = 0.0
+
+[initial state]
+mx = 1.0
+my = 0.0
+mz = 0.0
+
+[field]
+hstart = 0.5
+hfinal = -0.1
+hstep = -0.001
+mfinal = -0.5
+mstep = 0.5
+hx = 0.034
+hy = 1.0
+hz = 0.0
+
+[minimizer] 
+tol_fun = 1e-10
+cg_method = 1004
+precond_iter = 10
+hmag_on = 1
+print_hmag = 0
+verbose = 0
+
+[solver] 
+solver = MUMPS
+precond = REC_ILU
+method = store
+
+[parallel]
+backend = ESCRIPT

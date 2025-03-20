@@ -2,10 +2,13 @@ from prerequisits.src.helper import *
 from prerequisits.src.simulation import *
 from prerequisits.src.shape import *
 from prerequisits.src.postProc import *
+from prerequisits.src.AbstractPostProc import *
+from prerequisits.src.minSlopePostProc import *
 from prerequisits.src.database_handler import *
 from prerequisits.src.configuration import *
 from prerequisits.src.shape import *
 from bayes_opt import BayesianOptimization, UtilityFunction
+
 
 import math
 import copy
@@ -35,9 +38,6 @@ class Optimizer:
         # set max Iterations is set to None it will run until other stop condition is met
         self.max_Iter = max_Iter
 
-        # all Simulations
-        self.current_simulation = None
-        self.all_simulations = []
 
         # optimizer
         self.optimizer = None
@@ -234,13 +234,10 @@ class Optimizer:
                 
                 try:
                     #perform post processing
-                    postProc = self.post_process(i)
-                    self.current_simulation.set_results(postProc.get_results())
-                    self.all_simulations.append(copy.deepcopy(self.current_simulation))
+                    postProc, label = self.post_process(i)
 
                     #get results of post processing
                     params= self.shape.get_info_shape()
-                    label = self.current_simulation.get_results().get_x_max_lin()
                     self.logger.info(f"Result of Post-Processing: lin Hysterese Distance: {label}")
                     
                     #save results globaly
@@ -249,7 +246,7 @@ class Optimizer:
 
                         # also save image of post process here
                         
-                        postProc.save_plot(self.database_handler.get_postProc_golbal_path(), params, full_path=False)
+                        postProc.save_postProc_plot(self.database_handler.get_postProc_golbal_path(), i, full_path=False)
 
 
                     #save results localy
@@ -288,7 +285,7 @@ class Optimizer:
 
         return new_shape
 
-    def post_process(self, iter, threshhold_training=0.5, margin_to_line=0.05, m_guess=3):
+    def post_process(self, iter):
         """
         Perform post-processing on the data.
 
@@ -303,18 +300,18 @@ class Optimizer:
             dict: The post-processing results.
         """
         
-        postProc = PostProc(threshhold_training, margin_to_line, m_guess, self.shape, iter)
+        #postProc = PostProc(threshhold_training, margin_to_line, m_guess, self.shape, iter)
+        postProc = MinSlopePostProc()
         #load .dat file
-        postProc.load_file(self.location,  self.iter, self.current_simulation, self.shape.get_project_name()) 
+        postProc.load_file(self.location,  iter, self.current_simulation.get_microMag_SlurmID(), self.shape.get_project_name()) 
         self.logger.debug("File loaded")
         #perform linear regression
-        postProc.linear_regression(regression_restart_counter = 0)
-        self.logger.debug("Linear Regression done")
-        # anlayse data towards the linear regression
-        postProc.anasyse_data()
+        label = postProc.calc_label()
+        self.logger.debug(f"Label calculated: {label}")
     
-        postProc.save_plot(self.location, self.iter)
-        return postProc
+        postProc.save_postProc_plot(self.location, self.iter)
+        self.logger.debug("Plot saved")
+        return postProc, label
         
         
 
