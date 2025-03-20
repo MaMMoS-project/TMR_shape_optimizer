@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 # scp -r /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/* fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/.
+# rsync -av --exclude 'venv' --exclude '.venv' --exclude '.git' /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/ fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 #watch -n 1 'squeue -u fillies'
 #tail -f logs/output.log
@@ -77,5 +78,5 @@ def single_postprocess():
 
 
 if __name__ == "__main__":
-    #main()
-    single_postprocess()
+    main()
+    #single_postprocess()
