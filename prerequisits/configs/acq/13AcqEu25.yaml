@@ -1,0 +1,46 @@
+database:
+  use_DB: False
+  read: False  
+  write: False
+  name: "box504"                                                                           # save your data in the database its nicer :)
+  db_path: '/eee'           # Abs Path to database. Independent of individual Sim so needs to stay global
+  postProc_global_path: '/ceee' # Abs path to folder where plots of post proc will be saved also need to stay global                                
+
+shape:
+  name: "Ellipse"           # Ellipse, Box     are so far supportet
+  init_xlen: 1
+  init_ylen: 0.1
+  init_zlen: 0.01
+  
+
+simulation:
+  sim_name: '13AcqEu25'
+  iter: 2000
+  main_Mesh_min: 1e-4
+  main_mesh_max: 1.0
+  object_Mesh_max: 5e-3  # 5e-9
+  xlen_start: 1
+  xlen_stop: 2
+  ylen_start: 0.1
+  ylen_stop: 0.2
+  zlen_start: 0.01
+  zlen_stop: 0.02
+  hstart: 0.5
+  hfinal: -0.3
+  hstep: -0.0001
+
+optimizer:
+  acq_kind: 'ucb'           # 'ei', 'ucb', 'poi' supported
+  kappa: 2.5                # 2.576
+  xi: 0.0                   # 0.0
+  kappa_decay: 1.0          # 1.0
+  kappa_decay_delay: 0      # 0
+
+server:
+  number_cores: 2
+  mem_GB: 30
+  gpu: 'nv16'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
+
+generalSettings:
+  log_level: 2
+  location: 'not_set'   # Do not set this here. This is set in the main script

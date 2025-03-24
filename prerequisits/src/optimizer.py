@@ -12,6 +12,7 @@ from bayes_opt import BayesianOptimization, UtilityFunction
 import math
 import copy
 import logging
+import random
 
 # SUpposed to perform the entiere optimzationThis
 
@@ -57,6 +58,9 @@ class Optimizer:
 
         # Optimizer object
         self.optimizer = None
+
+        #Acquisation function Name
+        self.acq_kind = None
 
         # Database handler
         self.database_handler = None
@@ -219,17 +223,51 @@ class Optimizer:
 
             
 
-            # Initialize Bayesian Optimization without initial points
-            self.optimizer = BayesianOptimization(
-                f=None,  # Function is not directly used by the optimizer here
-                pbounds=pbounds,
-                random_state=42,
-                verbose=2  # Verbose output (loggin level)
-            )
             
-
-            self.utility_bayesian = UtilityFunction(kind=config.optimizer.acq_kind, kappa=config.optimizer.kappa, xi=config.optimizer.xi, kappa_decay=config.optimizer.kappa_decay, kappa_decay_delay=config.optimizer.kappa_decay_delay)
-            self.logger.info(f"Bo setup with Acquisation function: {config.optimizer.acq_kind}, kappa: {config.optimizer.kappa}, xi: {config.optimizer.xi}, kappa_decay: {config.optimizer.kappa_decay}, kappa_decay_delay: {config.optimizer.kappa_decay_delay}")
+            
+            if config.optimizer.acq_kind == "rand":
+                self.logger.info("Bo setup with Random Sampling")
+                self.acq_kind = "rand"
+                self.optimizer = None
+                self.benchmark_suggestor = Random_Suggestor(config.simulation.xlen_start, 
+                                                            config.simulation.xlen_stop, 
+                                                            config.simulation.ylen_start, 
+                                                            config.simulation.ylen_stop, 
+                                                            config.simulation.zlen_start, 
+                                                            config.simulation.zlen_stop)
+                self.logger.debug("Random Suggestor setup")
+                self.shape = self.get_initial_shape()
+                self.logger.info(f"Init shape to: {self.shape}")
+            elif config.optimizer.acq_kind == "grid":
+                self.logger.info("Bo setup with Grid Sampling")
+                self.acq_kind = "grid"
+                self.optimizer = None
+                include_boundaries = False
+                logging.info(f"Include Boundaries: {include_boundaries}")
+                self.benchmark_suggestor = Grid_Suggestor(config.simulation.xlen_start, 
+                                                          config.simulation.xlen_stop, 
+                                                          config.simulation.ylen_start, 
+                                                          config.simulation.ylen_stop, 
+                                                          config.simulation.zlen_start, 
+                                                          config.simulation.zlen_stop, 
+                                                          iterations=config.simulation.iter, 
+                                                          include_boundaries=include_boundaries) 
+                self.logger.info(f"Grid Suggestor setup with {self.benchmark_suggestor.get_num_grid_points()} Grid points")
+                self.logger.debug("Grid Suggestor setup")
+                self.shape = self.get_initial_shape()
+                self.logger.info(f"Init shape to: {self.shape}")
+            else:
+                # Initialize Bayesian Optimization without initial points
+                self.acq_kind = config.optimizer.acq_kind
+                self.optimizer = BayesianOptimization(
+                    f=None,  # Function is not directly used by the optimizer here
+                    pbounds=pbounds,
+                    random_state=42,
+                    verbose=2  # Verbose output (loggin level)
+                )
+                self.utility_bayesian = UtilityFunction(kind=config.optimizer.acq_kind, kappa=config.optimizer.kappa, xi=config.optimizer.xi, kappa_decay=config.optimizer.kappa_decay, kappa_decay_delay=config.optimizer.kappa_decay_delay)
+                self.logger.info(f"{self.utility_bayesian.kind} Utility function setup with kappa: {self.utility_bayesian.kappa}, xi: {self.utility_bayesian.xi}")
+                self.logger.info(f"Bo setup with Acquisation function: {config.optimizer.acq_kind}, kappa: {config.optimizer.kappa}, xi: {config.optimizer.xi}, kappa_decay: {config.optimizer.kappa_decay}, kappa_decay_delay: {config.optimizer.kappa_decay_delay}")
 
     def update_database(self, param, label, eta=0.1):
         """
@@ -334,21 +372,49 @@ class Optimizer:
     
                 
     def get_initial_shape(self):
-        new_suggestion = self.optimizer.suggest(self.utility_bayesian)
-        self.logger.info(f"Init shape to: {new_suggestion}")
-        new_shape = copy.deepcopy(self.shape)
-        new_shape.update_shape(new_suggestion)
+        if self.acq_kind == "rand":
+            self.logger.info("Random point generated, beanchmark testing")
+            new_suggestion = self.benchmark_suggestor.generate_random()
+            self.logger.info(f"Init shape to: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
+        elif self.acq_kind == "grid":
+            self.logger.info("Grid point generated, beanchmark testing")
+            new_suggestion = self.benchmark_suggestor.next_grid_point()
+            self.logger.info(f"Init shape to: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
+        else:
+            new_suggestion = self.optimizer.suggest(self.utility_bayesian)
+            self.logger.info(f"Init shape to: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
 
         return new_shape       
 
     def update_shape(self, params, label):
-         # register old shape:
-        self.optimizer.register(params, label)
-        #get suggestion for new shape:
-        new_suggestion = self.optimizer.suggest(self.utility_bayesian)
-        self.logger.debug(f"New Suggestion for shape: {new_suggestion}")
-        new_shape = copy.deepcopy(self.shape)
-        new_shape.update_shape(new_suggestion)
+        if self.acq_kind == "rand":
+            self.logger.debug("Random point generated, beanchmark testing")
+            new_suggestion = self.benchmark_suggestor.generate_random()
+            self.logger.info(f"New random Suggestion for shape: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
+        elif self.acq_kind == "grid":
+            self.logger.debug("Grid point generated, beanchmark testing")
+            new_suggestion = self.benchmark_suggestor.next_grid_point()
+            self.logger.info(f"New Grid Suggestion for shape: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
+        else:
+            # register old shape:
+            self.optimizer.register(params, label)
+            #get suggestion for new shape:
+            new_suggestion = self.optimizer.suggest(self.utility_bayesian)
+            self.logger.debug(f"New Suggestion for shape: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
+
+        return new_shape
 
         return new_shape
 

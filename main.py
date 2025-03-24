@@ -19,7 +19,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="db_para2.yaml")
+    config = load_config(location=location, config_name="reload_test.yaml")
 
 
     # set location of simulation to the location of the main.py file

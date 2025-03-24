@@ -9,6 +9,7 @@ import salome
 
 salome.salome_init()
 import salome_notebook
+import killSalome
 notebook = salome_notebook.NoteBook()
 sys.path.insert(0, r'/ceph/home/fillies/tmr_sensors/automatization')
 
@@ -157,6 +158,9 @@ smesh.SetName(a1_1, '1')
 
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser()
+
+
+killSalome.killAllPorts() 
 
   
  
