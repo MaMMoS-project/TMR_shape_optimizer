@@ -8,7 +8,7 @@ database:
 
 shape:
   name: "Box"           # Ellipse, Box, Stick     are so far supportet
-  init_xlen: 1          # Initial size of the shape not considert if DB is used
+  init_xlen: 0.3          # Initial size of the shape not considert if DB is used
   init_ylen: 0.1
   init_zlen: 0.01
   
@@ -19,8 +19,8 @@ simulation:
   main_Mesh_min: 1e-4     # Meshing in nm
   main_mesh_max: 1.0      # Meshing in nm
   object_Mesh_max: 5e-3   # Meshing in nm
-  xlen_start: 1           # ------- Parameter range for the simulation ---------
-  xlen_stop: 2
+  xlen_start: 0.3           # ------- Parameter range for the simulation ---------
+  xlen_stop: 0.4
   ylen_start: 0.1
   ylen_stop: 0.2
   zlen_start: 0.01

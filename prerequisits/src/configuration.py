@@ -53,7 +53,7 @@ class generalSettingsConfig(BaseModel):
     log_level: int
     location: str
 
-class Optimizer(BaseModel):
+class OptimizerConfig(BaseModel):
     acq_kind: str
     kappa: float
     xi: float
@@ -66,7 +66,7 @@ class Config(BaseModel):
     simulation: SimulationConfig
     server: ServerConfig
     generalSettings: generalSettingsConfig
-    optimizer: Optimizer
+    optimizer: OptimizerConfig
 
 
 

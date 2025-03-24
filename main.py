@@ -1,10 +1,12 @@
 from prerequisits.src.optimizer import *
+from prerequisits.src.minSlopePostProc import *
 import logging.config
 import json
 import sys
 from pathlib import Path
 
 # scp -r /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/* fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/.
+# rsync -av --exclude 'venv' --exclude '.venv' --exclude '.git' /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/ fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 #watch -n 1 'squeue -u fillies'
 #tail -f logs/output.log
@@ -17,7 +19,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="2su6100515001002.yaml")
+    config = load_config(location=location, config_name="db_para2.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -28,8 +30,8 @@ def main() -> None:
     # log config
     logging.debug(f"Configuration loaded: {config}")
 
-    optimizer = Optimizer(locattion=config.generalSettings.location ,
-                          max_Iter=config.simulation.iter)
+    optimizer = Optimizer(location=config.generalSettings.location ,
+                          max_iter=config.simulation.iter)
 
     # creat object e.g. free layer of sensor
     optimizer.creat_shape(config)  # only saves the values to the shape does not apply any chages to the files
@@ -45,7 +47,7 @@ def main() -> None:
     else:
         logging.info("No database used")
 
-    optimizer.optimize() # runs the optimization changes the file to desired.
+    optimizer.optimize() #.src.simulation import runs the optimization changes the file to desired.
 
 
 
@@ -57,13 +59,17 @@ def single_postprocess():
     threshhold_training=0.5
     margin_to_line=0.05
     #print(threshhold_training, margin_to_line)
-    temp_post = PostProc(threshhold_training, margin_to_line )
-    temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/2D_test.dat')
-    temp_post.linear_regression(regression_restart_counter = 0)
-    temp_post.anasyse_data()
-    temp_post.plot_data()
+    #temp_post = PostProc(threshhold_training, margin_to_line )
+    #temp_post.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/test.dat')
+    #print(temp_post.data)
+    #temp_post.linear_regression(regression_restart_counter = 0)
+    #temp_post.anasyse_data()
+    #temp_post.plot_data()
 
-
+    minSlopePostProc = MinSlopePostProc()
+    minSlopePostProc.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/test.dat')
+    print(minSlopePostProc.calc_label())
+    minSlopePostProc.plot_postProc()
 
 
 

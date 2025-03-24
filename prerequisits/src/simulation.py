@@ -138,11 +138,6 @@ class Simmulation():
     def get_salome_SlurmID(self):
         return self.salome_SlurmID
 
-    def set_results(self, results):
-        self.results = results
-
-    def get_results(self):
-        return self.results
     
     def creat_file_if_not_exist(self, file_name, header= " "):
         """
@@ -277,7 +272,7 @@ class Simmulation():
         self.shape.apply_all_modifications(self.location)
 
 
-    def run_salome_mesh_generation(self, project_name, repeat=3): 
+    def run_salome_mesh_generation(self, project_name, repeat=1): 
         """
         Generates mesh using Salome.
 
