@@ -1,7 +1,6 @@
 from prerequisits.src.helper import *
 from prerequisits.src.simulation import *
 from prerequisits.src.shape import *
-from prerequisits.src.postProc import *
 from prerequisits.src.AbstractPostProc import *
 from prerequisits.src.minSlopePostProc import *
 from prerequisits.src.database_handler import *
@@ -17,42 +16,114 @@ import logging
 # SUpposed to perform the entiere optimzationThis
 
 class Optimizer:
-    def __init__(self,locattion, max_Iter = None):
-        # initialze logger
-        """setup_logging(log_level, locattion )  # Assuming 3 is a high verbosity level equivalent to DEBUG
-        logger = logging.getLogger(__name__)
-        logger.debug("Logger Started")"""
+    """
+    Optimizer class for managing optimization processes and tracking known datapoints.
+
+    Attributes:
+        location (str): Directory path for storing results and operational files.
+        max_iter (int, optional): Maximum number of iterations (None for unlimited).
+        iter (int): Current iteration count.
+        shape (Any): Shape of the object being simulated.
+        optimizer (Any): The optimizer instance used for optimization.
+        database_handler (Any): Handler for database operations.
+        read (bool): Flag indicating read-only mode.
+        write (bool): Flag indicating write mode.
+        known_datapoints (dict): Dictionary to store unique datapoints with full data.
+    """
+
+    def __init__(self, location, max_iter=None):
+        """
+        Initializes the Optimizer instance.
+
+        Args:
+            location (str): Directory path for storing results and operational files.
+            max_iter (int, optional): Maximum number of iterations (None for unlimited).
+        """
         self.logger = logging.getLogger(__name__)
         self.logger.debug("Logger Started")
 
-        # set iter to zero at the begnning of optimization
+        # Initialize iteration count
         self.iter = 0
 
-        # base location of main.py hast to be the same as prerequisits and is where results an operational_FIles will be created
-        self.location = locattion
+        # Set the location for storing results and operational files
+        self.location = location
         self.logger.debug(f"Current Location set to {self.location}")
 
-        # box is the object whis is simulated
+        # Shape of the object to be simulated
         self.shape = None
 
-        # set max Iterations is set to None it will run until other stop condition is met
-        self.max_Iter = max_Iter
+        # Set max iterations (None for unlimited)
+        self.max_iter = max_iter
 
-
-        # optimizer
+        # Optimizer object
         self.optimizer = None
 
-        #database
+        # Database handler
         self.database_handler = None
 
-        # True if results should not be updated into db
+        # Read and write flags
         self.read = True
         self.write = False
 
+        # Store known datapoints as a dictionary for fast lookup
+        self.known_datapoints = {}
 
+    def add_datapoint(self, datapoint):
+        """
+        Adds a new datapoint to the known datapoints dictionary.
 
+        Args:
+            datapoint (array-like): An array of dimensions where the first three
+                                    represent unique characteristics and the fourth
+                                    dimension may repeat.
+        """
+        unique_key = tuple(datapoint[:3])
+        if unique_key not in self.known_datapoints:
+            self.known_datapoints[unique_key] = datapoint[3]
+            self.logger.debug(f"Datapoint added: {unique_key} -> {datapoint[3]}")
 
+    def is_known(self, datapoint):
+        """
+        Checks whether a given datapoint is already known.
 
+        Args:
+            datapoint (array-like): An array of dimensions where the first three
+                                    represent unique characteristics.
+
+        Returns:
+            bool: True if the datapoint is known, False otherwise.
+        """
+        unique_key = tuple(datapoint[:3])
+        return unique_key in self.known_datapoints
+
+    def load_data_from_database(self, database_handler):
+        """
+        Loads data from the database and registers it with the optimizer.
+
+        Args:
+            database_handler (object): An instance responsible for querying the database.
+        """
+        all_data = database_handler.query("SELECT * FROM shapes")
+        successful_loads = []
+        for data in all_data:
+            try:
+                unique_key = tuple(data[:3])
+                if not self.is_known(data):
+                    self.optimizer.register([data[0], data[1], data[2]], data[3])
+                    self.add_datapoint(data)
+                    successful_loads.append(data)
+            except Exception as e:
+                self.logger.warning(f"Could not load data from database for entry {data}: {str(e)}")
+
+        if successful_loads:
+            self.logger.info(f"{len(successful_loads)} data points successfully loaded from database.")
+            try:
+                best_label = self.optimizer.max['target']
+                self.logger.info(f"Best Label: {best_label}")
+            except KeyError:
+                self.logger.error("No 'target' found in optimizer max data. Check the optimizer's max computation logic.")
+        else:
+            self.logger.warning("No data points were successfully loaded from the database.")
 
     def setup_database(self, config: DatabaseConfig):
         """
@@ -85,11 +156,7 @@ class Optimizer:
         else:
             self.logger.error("trying to read data but no optimizer created yet to pass to")
 
-        
-        
-
-
-    def load_data_from_database(self, database_handler):
+    """def load_data_from_database(self, database_handler):
         all_data = database_handler.query("SELECT * FROM shapes")
         # Initialize an empty list or dict to store successfully loaded data points
         successful_loads = []
@@ -111,11 +178,8 @@ class Optimizer:
             except KeyError:
                 self.logger.error("No 'target' found in optimizer max data. Check the optimizer's max computation logic.")
         else:
-            self.logger.warning("No data points were successfully loaded from the database.")
+            self.logger.warning("No data points were successfully loaded from the database.")"""
             
-
-        
-
 
     def bayesian_optimization_setup(self, config: Config):
             """
@@ -220,10 +284,10 @@ class Optimizer:
             return
         
                
-        if self.max_Iter is not None:
-            self.logger.info(f"Starting optimization with {self.max_Iter} Iterations")
+        if self.max_iter is not None:
+            self.logger.info(f"Starting optimization with {self.max_iter} Iterations")
             
-            for i in range(1, self.max_Iter + 1):
+            for i in range(1, self.max_iter + 1):
                 self.iter = i
                 self.logger.info(f"Starting Iteration {i}")
                 self.current_simulation = Simmulation(self.shape,  self.location, iter=self.iter)
@@ -243,6 +307,9 @@ class Optimizer:
                     #save results globaly
                     if self.write and self.database_handler is not None:
                         self.update_database(params, label)
+                        self.logger.debug("Data saved to database")
+                        self.load_data_from_database(self.database_handler)
+                        self.logger.debug("Data loaded from database")
 
                         # also save image of post process here
                         

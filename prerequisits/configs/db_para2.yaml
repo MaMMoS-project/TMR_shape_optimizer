@@ -1,10 +1,10 @@
 database:
-  use_DB: False
-  read: False  
-  write: False
-  name: "box504"                                                                           # save your data in the database its nicer :)
-  db_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/cube.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
-  postProc_global_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/cube' # Abs path to folder where plots of post proc will be saved also need to stay global                                
+  use_DB: True
+  read: True  
+  write: True
+  name: "paratest"                                                                           # save your data in the database its nicer :)
+  db_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/paratest.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
+  postProc_global_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/paratest' # Abs path to folder where plots of post proc will be saved also need to stay global                            
 
 shape:
   name: "Box"           # Ellipse, Box, Stick     are so far supportet
@@ -14,8 +14,8 @@ shape:
   
 
 simulation:
-  sim_name: 'santa_tmp'
-  iter: 5                 # Number of iterations of optimization
+  sim_name: 'db_para2'
+  iter: 100               # Number of iterations of optimization
   main_Mesh_min: 1e-4     # Meshing in nm
   main_mesh_max: 1.0      # Meshing in nm
   object_Mesh_max: 5e-3   # Meshing in nm
@@ -30,8 +30,8 @@ simulation:
   hstep: -0.001           # Steps in Hysteresis loop
 
 optimizer:
-  acq_kind: 'ei'           # 'ei', 'ucb', 'poi' supported parameter only consider if required
-  kappa: 0.0                # default: 2.576
+  acq_kind: 'ucb'           # 'ei', 'ucb', 'poi' supported parameter only consider if required
+  kappa: 2.576                # default: 2.576
   xi: 25.0                  # default:0.0
   kappa_decay: 1.0          # default:1.0
   kappa_decay_delay: 0      # default:0

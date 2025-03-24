@@ -19,7 +19,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="santa_tmp.yaml")
+    config = load_config(location=location, config_name="db_para2.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -30,8 +30,8 @@ def main() -> None:
     # log config
     logging.debug(f"Configuration loaded: {config}")
 
-    optimizer = Optimizer(locattion=config.generalSettings.location ,
-                          max_Iter=config.simulation.iter)
+    optimizer = Optimizer(location=config.generalSettings.location ,
+                          max_iter=config.simulation.iter)
 
     # creat object e.g. free layer of sensor
     optimizer.creat_shape(config)  # only saves the values to the shape does not apply any chages to the files

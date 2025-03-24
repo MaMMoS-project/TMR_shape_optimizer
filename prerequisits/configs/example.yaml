@@ -10,11 +10,11 @@ shape:
   name: "Box"           # Ellipse, Box, Stick     are so far supportet
   init_xlen: 0.3          # Initial size of the shape not considert if DB is used
   init_ylen: 0.1
-  init_zlen: 0.01
+  init_zlen: 0.01as
   
 
 simulation:
-  sim_name: 'santa_tmp'
+  sim_name: 'example'
   iter: 5                 # Number of iterations of optimization
   main_Mesh_min: 1e-4     # Meshing in nm
   main_mesh_max: 1.0      # Meshing in nm
