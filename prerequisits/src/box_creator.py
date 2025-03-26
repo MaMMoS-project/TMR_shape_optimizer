@@ -129,12 +129,10 @@ a3_1 = Mesh_2.GroupOnGeom(a3,'3',SMESH.VOLUME)
 a1_2 = Mesh_2.GroupOnGeom(a1,'1',SMESH.VOLUME)
 a2_2 = Mesh_2.GroupOnGeom(a2,'2',SMESH.VOLUME)
 a3_2 = Mesh_2.GroupOnGeom(a3,'3',SMESH.VOLUME)
-isDone = Mesh_2.Compute()
 [ a1_1, a2_1, a3_1, a1_2, a2_2, a3_2 ] = Mesh_2.GetGroups()
 NETGEN_3D_Parameters_1.SetLocalSizeOnShape(targetBox, object_Mesh_max)
 NETGEN_3D_Parameters_1.SetCheckChartBoundary( 48 )
 isDone = Mesh_2.Compute()
-[ a1_1, a2_1, a3_1, a1_2, a2_2, a3_2 ] = Mesh_2.GetGroups()
 try:
 
   
@@ -144,16 +142,6 @@ except:
   print('ExportUNV() failed. Invalid file name?')
 
 
-## Set names of Mesh objects
-smesh.SetName(NETGEN_1D_2D_3D.GetAlgorithm(), 'NETGEN 1D-2D-3D')
-smesh.SetName(NETGEN_3D_Parameters_1, 'NETGEN 3D Parameters_1')
-smesh.SetName(Mesh_2.GetMesh(), 'Mesh_2')
-smesh.SetName(a3_2, '3')
-smesh.SetName(a2_2, '2')
-smesh.SetName(a1_2, '1')
-smesh.SetName(a3_1, '3')
-smesh.SetName(a2_1, '2')
-smesh.SetName(a1_1, '1')
 
 
 if salome.sg.hasDesktop():

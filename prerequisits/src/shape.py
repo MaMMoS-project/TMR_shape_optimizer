@@ -44,7 +44,7 @@ class Shape:
         self.hstart = config.simulation.hstart          
         self.hfinal = config.simulation.hfinal
         self.hstep = config.simulation.hstep
-        self.mfinal = -0.5
+        self.mfinal = -1.0
         self.mstep = 0.5
         self.hx = 0.034
         self.hy = 1.0
