@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 
+
 # scp -r /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/* fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/.
 # rsync -av --exclude 'venv' --exclude '.venv' --exclude '.git' /home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/ fillies@scandium:/ceph/home/fillies/tmr_sensors/simplebox/UCB/restart_test/
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
@@ -19,7 +20,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="6AcqBu10.yaml")
+    config = load_config(location=location, config_name="14AcqBp001.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -47,6 +48,10 @@ def main() -> None:
     else:
         logging.info("No database used")
 
+    use_local_data = True
+    if use_local_data:
+        optimizer.load_local_data()
+
     optimizer.optimize() #.src.simulation import runs the optimization changes the file to desired.
 
 
@@ -72,6 +77,12 @@ def single_postprocess():
     minSlopePostProc.plot_postProc()
 
 
+def test_grid():
+    test_grid = Grid_Suggestor(xStart=1, xEnd=2, yStart=0.1, yEnd=0.2, zStart=0.001, zEnd=0.002, iterations=200, include_boundaries=False)
+    test_grid.print_grid_points() 
+    
+
+
 
 
 
@@ -80,3 +91,4 @@ def single_postprocess():
 if __name__ == "__main__":
     main()
     #single_postprocess()
+    #test_grid()

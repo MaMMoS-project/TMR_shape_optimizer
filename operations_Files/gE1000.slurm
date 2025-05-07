@@ -1,42 +1,17 @@
 #!/bin/bash
-#SBATCH --partition=dissSims
-#SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
-#SBATCH --mem-per-cpu=25G		# MB
-#SBATCH --time=10-12		# MINUTES, DAYS-HOURS
-#
-# GPU options
-#SBATCH --gres=gpu:1		# request also one cpu per gpu
+#SBATCH --gpus=1
+#SBATCH --mem-per-cpu=25G
 #SBATCH --constraint=nv12
-#
-# OPTIONAL
-#SBATCH --export=NONE   # do not propagate environment variables from submit node to allocated node
-#SBATCH --job-name="santa_tmp"	# default is batch script name
-#SBATCH --account=zmus		# if we ever define project accounts
-# #SBATCH --nodelist=Gd			# request a specific node, only as many as in --nodes
-# #SBATCH --exclude=Nd		# do not grant resouces on those nodes
+#SBATCH --time=1-0
+#SBATCH --export=NONE
+#SBATCH --job-name="gE1000"
+#SBATCH --mail-type=END
 
-# INFO:
-# --constraint options for gpu: 
-# "nvidia" use any kind of nvidia card 
-# "amd" use only dysprosium (for small gpu jobs)
-# request specific cards: "nvidia12gb", "nvidia16gb", "amd8gb"
-# combine specific cards with "nvidia12gb|nvidia16gb" (equal to "nvidia") 
-# 
-# number of tets per gpu:
-# AMD Radeon R9 390 8GB: < 10e6 tets 
-# NVIDIA Tesla K40|K80 12GB: < 18e6 tets
-# NVIDIA Tesla P100-PCIE 16GB: < 25e6 tets 
-# NVIDIA Tesla V100-PCIE 32GB: < 50e6 tets 
-#
-# --export=NONE
-# By default all environment variables of the shell invoking the sbatch command are propagated.
-# This may cause unexpected behaviour as for example $HOME used in this script might be different 
-# from the expected /home/<username>. Also consider $PATH, $OCL* or $CUDA* variables. I recommend
-# to set --export=NONE to avoid the propagation.
 
-MODELNAME="santa_tmp"
+
+
+MODELNAME="gE1000"
 # BINDIR="/ceph/programs/b4vex"
 # MUMAGDIR="/ceph/share/users/fischbacher/bin/py"
 # ESCRIPT="/ceph/programs/escript_py2/bin/run-escript"

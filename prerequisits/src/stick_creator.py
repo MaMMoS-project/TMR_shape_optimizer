@@ -165,4 +165,3 @@ if salome.sg.hasDesktop():
 
 
 
-killSalome.killAllPorts() 

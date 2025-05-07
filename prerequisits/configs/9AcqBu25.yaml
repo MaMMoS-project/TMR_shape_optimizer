@@ -1,0 +1,46 @@
+database:
+  use_DB: False
+  read: False  
+  write: False
+  name: "box504"                                                                           # save your data in the database its nicer :)
+  db_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/cube.db'           # Abs Path to database. Independent of individual Sim so needs to stay global
+  postProc_global_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/cube' # Abs path to folder where plots of post proc will be saved also need to stay global                                
+
+shape:
+  name: "Box"           # Ellipse, Box, Stick     are so far supportet
+  init_xlen: 1.0          # Initial size of the shape not considert if DB is used
+  init_ylen: 0.1
+  init_zlen: 0.01
+  
+
+simulation:
+  sim_name: '9AcqBu25'
+  iter: 1050                 # Number of iterations of optimization
+  main_Mesh_min: 1e-4     # Meshing in nm
+  main_mesh_max: 1.0      # Meshing in nm
+  object_Mesh_max: 5e-3   # Meshing in nm
+  xlen_start: 1           # ------- Parameter range for the simulation ---------
+  xlen_stop: 2
+  ylen_start: 0.1
+  ylen_stop: 0.2
+  zlen_start: 0.01
+  zlen_stop: 0.02         # ---------------------------------------------------
+  hstart: 0.5             # Range of Hysteresis loop
+  hfinal: -0.1
+  hstep: -0.001           # Steps in Hysteresis loop
+
+optimizer:
+  acq_kind: 'ucb'           # 'ei', 'ucb', 'poi' supported parameter only consider if required
+  kappa: 2.5                # default: 2.576
+  xi: 0.0                  # default:0.0
+  kappa_decay: 1.0          # default:1.0
+  kappa_decay_delay: 0      # default:0
+
+server:
+  number_cores: 2           # Number of cores to use
+  mem_GB: 25
+  gpu: 'nv12'                # nv12, nv16, nv32 B4vex only Salome is currently on CPU
+
+generalSettings:
+  log_level: 2
+  location: 'not_set'   # Do not set this here. This is set in the main script only listed for documentation

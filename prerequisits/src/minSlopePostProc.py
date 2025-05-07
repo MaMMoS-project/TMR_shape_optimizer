@@ -115,20 +115,36 @@ class MinSlopePostProc(AbstractPostProc):
     
     def calc_lin_dis(self):
 
+        deviation = np.abs(self.df['M'] - MinSlopePostProc.line(self.df['H_ex'], self.m, self.b))
+        in_margin = deviation < self.margin_to_line
 
-        self.number_points_in_margin = np.sum(np.abs(self.df['M'] - MinSlopePostProc.line(self.df['H_ex'], self.m, self.b)) < self.margin_to_line)
-        
+        # Count total in-margin points (could include multiple groups)
+        self.number_points_in_margin = np.sum(in_margin)
 
-        self.x_max_lin = np.max(self.df['H_ex'][np.abs(self.df['M'] - MinSlopePostProc.line(self.df['H_ex'], self.m, self.b)) < self.margin_to_line]) 
-        
+        # Find the index where the first deviation occurs (first False in in_margin)
+        first_break_idx = np.argmax(~in_margin.values)
 
-        # test if the linear behaviour reasanable
+        # Get the last index before the break
+        last_in_margin_idx = first_break_idx - 1 if first_break_idx > 0 else None
+
+        # Validate
+        if last_in_margin_idx is None:
+            self.logger.error(f'[ERROR]: No initial linear region detected')
+            raise ValueError('Skip Postprocessing')
+
+        self.x_max_lin = self.df['H_ex'].iloc[last_in_margin_idx]
+
         if not self.x_max_lin > 0:
             self.logger.error(f'[ERROR]: Linear behaviour is not reasonable: {self.x_max_lin}')
-            raise ValueError(f'Skip Postprocessing')
-        if not self.number_points_in_margin > 8 :
+            raise ValueError('Skip Postprocessing')
+
+        if not self.number_points_in_margin > 8:
             self.logger.error(f'[ERROR]: Number of points in margin is not reasonable: {self.number_points_in_margin}')
-            raise ValueError(f'Skip Postprocessing')
+            raise ValueError('Skip Postprocessing')
+
+        
+
+
         
         return self.x_max_lin
     

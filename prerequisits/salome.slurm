@@ -8,7 +8,8 @@
 #SBATCH --exclude=Ce,Nd,Eu,Pr
 #SBATCH --mail-type=END
 
-SALOME="/scandium/home/programs/UB22/SALOME-9.7.0-native-DB10-SRC/salome"
+#SALOME="/scandium/home/programs/UB22/SALOME-9.7.0-native-DB10-SRC/salome"
+SALOME="/scandium/home/programs/UB22/SALOME-9.10.0-native-UB22.04-SRC/salome"
 JOBID="$SLURM_JOB_ID"
 SIM_DIR="$HOME/slurm-$JOBID"
 

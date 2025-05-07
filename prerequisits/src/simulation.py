@@ -6,6 +6,7 @@ import time
 import shutil
 import logging
 import time
+import stat
 
 from prerequisits.src.shape import *
 
@@ -65,7 +66,7 @@ class Simmulation():
         self.delete_and_create_folder("operations_Files")
         self.create_directory_if_not_exists(f"output")
         self.create_directory_if_not_exists(f"output/graphics")
-        self.creat_file_if_not_exist("output/labels.txt")
+        self.create_file_if_not_exist("output/labels.txt")
         self.delete_and_create_folder(f"output/{self.iter}")  
 
         # Check for required files
@@ -138,23 +139,37 @@ class Simmulation():
     def get_salome_SlurmID(self):
         return self.salome_SlurmID
 
-    
-    def creat_file_if_not_exist(self, file_name, header= " "):
+
+
+    def create_file_if_not_exist(self, file_name, header=" "):
         """
         Create a file if it does not already exist.
+        If it exists, ensure it is writable and executable.
 
         Args:
-            file_path (str): The path of the file to create.
-            logger: The logger object to log the status.
+            file_name (str): The name of the file (relative to self.location).
+            header (str): Optional header content for new files.
 
         Returns:
             None
         """
-        folder_path = os.path.join(self.location, file_name)
-        if not os.path.exists(folder_path):
-            with open(folder_path, 'w') as file:
-                #self.logger.debug(f"Created file: {folder_path}")
+        file_path = os.path.join(self.location, file_name)
+
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as file:
                 file.write(header)
+            self.logger.info(f"Created new file: {file_path}")
+        else:
+            self.logger.debug(f"File already exists: {file_path}")
+
+        # Make file writeable and executable by the user
+        try:
+            current_permissions = os.stat(file_path).st_mode
+            os.chmod(file_path, current_permissions | stat.S_IWUSR | stat.S_IXUSR)
+            self.logger.debug(f"Updated permissions for file: {file_path} (write + exec)")
+        except Exception as e:
+            self.logger.warning(f"Could not update permissions for {file_path}: {str(e)}")
+
 
 
     def delete_and_create_folder(self, folder_name):

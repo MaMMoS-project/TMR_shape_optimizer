@@ -8,11 +8,11 @@ my = 0.0
 mz = 0.0
 
 [field]
-hstart = 0.5
-hfinal = -0.1
+hstart = 0.18
+hfinal = -0.01
 hstep = -0.001
-mfinal = -0.5
-mstep = 0.5
+mfinal = -1.0
+mstep = 0.9
 hx = 0.034
 hy = 1.0
 hz = 0.0

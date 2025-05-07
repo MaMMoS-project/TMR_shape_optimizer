@@ -1,20 +1,17 @@
 #!/bin/bash
-#SBATCH --partition=dissSims
-#SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=25G	# MB
-#SBATCH --time=0-2		# MINUTES, DAYS-HOURS
+#SBATCH --mem-per-cpu=25G
+#SBATCH --time=1-0
+#SBATCH --export=NONE
+#SBATCH --job-name="gE1000"
+#SBATCH --exclude=Ce,Nd,Eu,Pr
+#SBATCH --mail-type=END
 
-#
-# OPTIONAL
-#SBATCH --export=None
-#SBATCH --job-name="santa_tmp"	# default is batch script name
-# #SBATCH --account=zmus		# if we ever define project accounts
-# #SBATCH --nodelist=Gd			# request a specific node, only as many as in --nodes
-# #SBATCH --exclude=Eu,Ce,Y,Pr		# do not grant resouces on those nodes
-
-SALOME="/scandium/home/programs/UB22/SALOME-9.7.0-native-DB10-SRC/salome"
+#SALOME="/scandium/home/programs/UB22/SALOME-9.7.0-native-DB10-SRC/salome"
+SALOME="/scandium/home/programs/UB22/SALOME-9.10.0-native-UB22.04-SRC/salome"
+JOBID="$SLURM_JOB_ID"
+SIM_DIR="$HOME/slurm-$JOBID"
 
 echo "JOBNAME:" $SLURM_JOB_NAME
 echo "PARTITION:" $SLURM_JOB_PARTITION
@@ -23,21 +20,27 @@ echo "ALLOC. NODES:" $SLURMD_NODENAME
 echo "SUBMIT DIR:" $SLURM_SUBMIT_DIR
 
 # copy files if necessary
-SIM_DIR="$HOME"/slurm-"$SLURM_JOB_ID"
-echo "SIM_DIR:" $SIM_DIR
-if [ ! -d "$SIM_DIR" ]; then
-  mkdir -p "$SIM_DIR"
-fi
+SIMDIR="$HOME/slurm-$SLURM_JOB_ID"
+mkdir -p "$SIMDIR"
+export TMPDIR="$SIMDIR/tmp"
+mkdir -p "$TMPDIR"
+echo "SIMDIR: $SIMDIR"
+echo "TMPDIR: $TMPDIR"
+mkdir -p /tmp/logs/$USER
+
 
 # prepare
 cd "$SIM_DIR"
 echo "PWD:" $PWD
 cp "$SLURM_SUBMIT_DIR"/salome_mesh.py .
-#cp "$SLURM_SUBMIT_DIR"/equi_128_dirac75.tess .
-#cp "$SLURM_SUBMIT_DIR"/c300_lnorm_50.00_21.00_1.00.tess .
 
-# meshing
-"$SALOME" start -t salome_mesh.py
+# Optionally set a unique SALOME tmp directory to avoid leftover /tmp usage
+#export SALOME_TMP_DIR="$SIM_DIR"/salome_tmp
+#mkdir -p "$SALOME_TMP_DIR"
+
+# Run SALOME in batch mode
+echo "Running SALOME..."
+"$SALOME" start --shutdown=1 -t salome_mesh.py
 
 sleep 10 
 

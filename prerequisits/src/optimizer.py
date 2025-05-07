@@ -13,6 +13,8 @@ import math
 import copy
 import logging
 import random
+import os
+import ast
 
 # SUpposed to perform the entiere optimzationThis
 
@@ -128,6 +130,50 @@ class Optimizer:
                 self.logger.error("No 'target' found in optimizer max data. Check the optimizer's max computation logic.")
         else:
             self.logger.warning("No data points were successfully loaded from the database.")
+
+    def load_local_data(self):
+        """
+        Loads data from a local 'labels.txt' file if it exists, and registers it with the optimizer.
+        """
+        file_path = os.path.join(self.location, 'output', 'labels.txt')
+        
+        if not os.path.exists(file_path):
+            self.logger.info("No local label file found. Skipping local data loading.")
+            return
+
+        self.logger.info(f"Loading local data from: {file_path}")
+        successful_loads = []
+
+        try:
+            with open(file_path, 'r') as file:
+                for i, line in enumerate(file):
+                    try:
+                        parts = line.strip().split(']')
+                        if len(parts) < 2:
+                            continue  # Skip malformed lines
+
+                        shape_str = parts[0] + ']'
+                        shape = ast.literal_eval(shape_str)
+                        objective = float(parts[1].strip())
+
+                        data = shape + [objective]  # full data as list of 4 elements
+
+                        if not self.is_known(data):
+                            self.optimizer.register([data[0], data[1], data[2]], data[3])
+                            self.add_datapoint(data)
+                            successful_loads.append(data)
+                            self.logger.debug(f"[LOCAL] Added point #{i}: shape={shape}, objective={objective}")
+                        else:
+                            self.logger.debug(f"[LOCAL] Skipped known point #{i}: shape={shape}")
+                    except Exception as inner_e:
+                        self.logger.warning(f"[LOCAL] Failed to parse line '{line.strip()}': {str(inner_e)}")
+        except Exception as e:
+            self.logger.error(f"Failed to read label file: {str(e)}")
+            return
+
+        self.logger.info(f"{len(successful_loads)} data points successfully loaded from local file.")
+
+
 
     def setup_database(self, config: DatabaseConfig):
         """
@@ -254,6 +300,23 @@ class Optimizer:
                                                           include_boundaries=include_boundaries) 
                 self.logger.info(f"Grid Suggestor setup with {self.benchmark_suggestor.get_num_grid_points()} Grid points")
                 self.logger.debug("Grid Suggestor setup")
+                self.shape = self.get_initial_shape()
+                self.logger.info(f"Init shape to: {self.shape}")
+            elif config.optimizer.acq_kind == "plane":
+                self.logger.info("Bo setup with Grid Sampling")
+                self.acq_kind = "plane"
+                self.optimizer = None
+                include_boundaries = False
+                logging.info(f"Include Boundaries: {include_boundaries}")
+                self.benchmark_suggestor = Plane_Suggestor(config.simulation.xlen_start, 
+                                                          config.simulation.xlen_stop, 
+                                                          config.simulation.ylen_start, 
+                                                          config.simulation.ylen_stop, 
+                                                          config.simulation.zlen_stop,
+                                                          iterations=config.simulation.iter, 
+                                                          include_boundaries=include_boundaries) 
+                self.logger.info(f"Plane Suggestor setup with {self.benchmark_suggestor.get_num_grid_points()} Grid points")
+                self.logger.debug("Plane Suggestor setup")
                 self.shape = self.get_initial_shape()
                 self.logger.info(f"Init shape to: {self.shape}")
             else:
@@ -384,6 +447,12 @@ class Optimizer:
             self.logger.info(f"Init shape to: {new_suggestion}")
             new_shape = copy.deepcopy(self.shape)
             new_shape.update_shape(new_suggestion)
+        elif self.acq_kind == "plane":
+            self.logger.info("Plane point generated, beanchmark testing")
+            new_suggestion = self.benchmark_suggestor.next_grid_point()
+            self.logger.info(f"Init shape to: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
         else:
             new_suggestion = self.optimizer.suggest(self.utility_bayesian)
             self.logger.info(f"Init shape to: {new_suggestion}")
@@ -403,6 +472,12 @@ class Optimizer:
             self.logger.debug("Grid point generated, beanchmark testing")
             new_suggestion = self.benchmark_suggestor.next_grid_point()
             self.logger.info(f"New Grid Suggestion for shape: {new_suggestion}")
+            new_shape = copy.deepcopy(self.shape)
+            new_shape.update_shape(new_suggestion)
+        elif self.acq_kind == "plane":
+            self.logger.debug("Plane point generated, beanchmark testing")
+            new_suggestion = self.benchmark_suggestor.next_grid_point()
+            self.logger.info(f"New Plane Suggestion for shape: {new_suggestion}")
             new_shape = copy.deepcopy(self.shape)
             new_shape.update_shape(new_suggestion)
         else:

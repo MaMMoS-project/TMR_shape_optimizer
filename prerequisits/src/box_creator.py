@@ -148,7 +148,7 @@ if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser()
 
 
-killSalome.killAllPorts() 
+#killSalome.killAllPorts() 
 
   
  
