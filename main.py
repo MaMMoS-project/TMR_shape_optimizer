@@ -11,6 +11,7 @@ from pathlib import Path
 #nohup python3 main.py > logs/output.log 2>&1 & echo $! > logs/pid.txt &
 #watch -n 1 'squeue -u fillies'
 #tail -f logs/output.log
+# find /path/to/your/folder -type d -exec chmod 777 {} +
 
 
 
@@ -20,7 +21,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="14AcqBp001.yaml")
+    config = load_config(location=location, config_name="pE200.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -72,7 +73,7 @@ def single_postprocess():
     #temp_post.plot_data()
 
     minSlopePostProc = MinSlopePostProc()
-    minSlopePostProc.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/test.dat')
+    minSlopePostProc.load_file_singe('/home/fillies/Documents/UWK_Projects/TMR_shape_optimizer/data/pE200.dat')
     print(minSlopePostProc.calc_label())
     minSlopePostProc.plot_postProc()
 

@@ -8,6 +8,7 @@ from prerequisits.src.configuration import OptimizerConfig
 from prerequisits.src.shape import Shape
 from prerequisits.src.AbstractPostProc import AbstractPostProc
 
+
 class MinSlopePostProc(AbstractPostProc):
     """
     Implementation of AbstractPostProc for post-processing simulation data,
@@ -115,17 +116,35 @@ class MinSlopePostProc(AbstractPostProc):
     
     def calc_lin_dis(self):
 
-        deviation = np.abs(self.df['M'] - MinSlopePostProc.line(self.df['H_ex'], self.m, self.b))
+
+        # Only consider H_ex > 0
+        mask_positive = self.df['H_ex'] > 0
+        H_ex_pos = self.df['H_ex'][mask_positive]
+        
+        
+        M_pos = self.df['M'][mask_positive]
+
+        # Compute fitted line and deviation
+        fit_line = MinSlopePostProc.line(H_ex_pos, self.m, self.b)
+        deviation = np.abs(M_pos - fit_line)
         in_margin = deviation < self.margin_to_line
 
-        # Count total in-margin points (could include multiple groups)
+
+
+        # Store and print summary
         self.number_points_in_margin = np.sum(in_margin)
+        self.logger.debug(f'Number of points in margin: {self.number_points_in_margin}')
+
+  
 
         # Find the index where the first deviation occurs (first False in in_margin)
-        first_break_idx = np.argmax(~in_margin.values)
+        # data is in reverse order bc micro mag starts at externbal field = 1
+        last_break_idx = len(in_margin) - np.argmax((~in_margin.values)[::-1])
+        
 
         # Get the last index before the break
-        last_in_margin_idx = first_break_idx - 1 if first_break_idx > 0 else None
+        last_in_margin_idx = last_break_idx - 1 if last_break_idx > 0 else None
+        #print(last_in_margin_idx)
 
         # Validate
         if last_in_margin_idx is None:
@@ -133,6 +152,7 @@ class MinSlopePostProc(AbstractPostProc):
             raise ValueError('Skip Postprocessing')
 
         self.x_max_lin = self.df['H_ex'].iloc[last_in_margin_idx]
+        self.logger.debug(f'new x_max_lin: {self.x_max_lin}')
 
         if not self.x_max_lin > 0:
             self.logger.error(f'[ERROR]: Linear behaviour is not reasonable: {self.x_max_lin}')
