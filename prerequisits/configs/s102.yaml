@@ -8,14 +8,14 @@ database:
 
 shape:
   name: "Stick"           # Ellipse, Box, Stick     are so far supportet
-  init_xlen: 1.21          # Initial size of the shape not considert if DB is used
-  init_ylen: 0.1
+  init_xlen: 1.15          # Initial size of the shape not considert if DB is used
+  init_ylen: 0.2
   init_zlen: 0.02
   
 
 simulation:
-  sim_name: '15Su25'
-  iter: 1050                 # Number of iterations of optimization
+  sim_name: 's1'
+  iter: 1                 # Number of iterations of optimization
   main_Mesh_min: 1e-4     # Meshing in nm
   main_mesh_max: 1.0      # Meshing in nm
   object_Mesh_max: 5e-3   # Meshing in nm

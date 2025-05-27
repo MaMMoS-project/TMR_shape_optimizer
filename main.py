@@ -21,7 +21,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="pE200.yaml")
+    config = load_config(location=location, config_name="15Su25.yaml")
 
 
     # set location of simulation to the location of the main.py file
