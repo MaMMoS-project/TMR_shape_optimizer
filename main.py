@@ -21,7 +21,7 @@ def main() -> None:
 
     # Load the configuration
 
-    config = load_config(location=location, config_name="15Su25.yaml")
+    config = load_config(location=location, config_name="16Su25.yaml")
 
 
     # set location of simulation to the location of the main.py file
@@ -49,7 +49,7 @@ def main() -> None:
     else:
         logging.info("No database used")
 
-    use_local_data = True
+    use_local_data = True               # only for restart
     if use_local_data:
         optimizer.load_local_data()
 
