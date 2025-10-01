@@ -7,15 +7,15 @@ database:
   postProc_global_path: '/ceph/home/fillies/tmr_sensors/automatization/Databases/cube' # Abs path to folder where plots of post proc will be saved also need to stay global                                
 
 shape:
-  name: "Box"           # Ellipse, Box, Stick     are so far supportet
+  name: "Ellipse"           # Ellipse, Box, Stick     are so far supportet
   init_xlen: 1.0          # Initial size of the shape not considert if DB is used
   init_ylen: 0.1
   init_zlen: 0.01
   
 
 simulation:
-  sim_name: 'boxOver'
-  iter: 1050                 # Number of iterations of optimization
+  sim_name: 'elliOver'
+  iter: 300                 # Number of iterations of optimization
   main_Mesh_min: 1e-4     # Meshing in nm
   main_mesh_max: 1.0      # Meshing in nm
   object_Mesh_max: 5e-3   # Meshing in nm

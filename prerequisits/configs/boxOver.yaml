@@ -15,7 +15,7 @@ shape:
 
 simulation:
   sim_name: 'boxOver'
-  iter: 1050                 # Number of iterations of optimization
+  iter: 300                 # Number of iterations of optimization
   main_Mesh_min: 1e-4     # Meshing in nm
   main_mesh_max: 1.0      # Meshing in nm
   object_Mesh_max: 5e-3   # Meshing in nm
